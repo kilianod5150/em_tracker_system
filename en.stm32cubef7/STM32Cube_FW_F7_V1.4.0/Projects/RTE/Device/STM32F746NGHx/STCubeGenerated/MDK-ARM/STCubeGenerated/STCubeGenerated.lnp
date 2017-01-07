@@ -1,0 +1,26 @@
+--cpu Cortex-M7.fp.sp
+"stcubegenerated\stm32f7xx_hal_flash.o"
+"stcubegenerated\stm32f7xx_hal_pwr.o"
+"stcubegenerated\stm32f7xx_hal_dma.o"
+"stcubegenerated\stm32f7xx_hal.o"
+"stcubegenerated\stm32f7xx_hal_tim.o"
+"stcubegenerated\stm32f7xx_hal_uart.o"
+"stcubegenerated\stm32f7xx_hal_gpio.o"
+"stcubegenerated\stm32f7xx_hal_i2c.o"
+"stcubegenerated\stm32f7xx_hal_i2c_ex.o"
+"stcubegenerated\stm32f7xx_hal_flash_ex.o"
+"stcubegenerated\stm32f7xx_hal_dma_ex.o"
+"stcubegenerated\stm32f7xx_hal_cortex.o"
+"stcubegenerated\stm32f7xx_hal_rcc.o"
+"stcubegenerated\stm32f7xx_hal_pwr_ex.o"
+"stcubegenerated\stm32f7xx_hal_tim_ex.o"
+"stcubegenerated\stm32f7xx_hal_rcc_ex.o"
+"stcubegenerated\startup_stm32f746xx.o"
+"stcubegenerated\system_stm32f7xx.o"
+"stcubegenerated\stm32f7xx_hal_msp.o"
+"stcubegenerated\main.o"
+"stcubegenerated\stm32f7xx_it.o"
+--library_type=microlib --strict --scatter "STCubeGenerated\STCubeGenerated.sct"
+--diag_suppress=L6329 --summary_stderr --info summarysizes --map --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "STCubeGenerated.map" -o STCubeGenerated\STCubeGenerated.axf

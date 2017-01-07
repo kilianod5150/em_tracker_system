@@ -1,0 +1,4 @@
+load STM32F746NGHx 
+project name STCubeGenerated 
+project toolchain "MDK-ARM V5" 
+project path C:\Users\Kilian\Downloads\en.stm32cubef7\STM32Cube_FW_F7_V1.4.0\Projects\RTE\Device\STM32F746NGHx\ 

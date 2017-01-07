@@ -1,0 +1,114 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Tool Versions:</h2>
+IDE-Version: µVision V5.20.0.0
+Copyright (C) 2016 ARM Ltd and ARM Germany GmbH. All rights reserved.
+License Information: Kilian OD, UCC, LIC=----
+ 
+Tool Versions:
+Toolchain:       MDK-Lite  Version: 5.20
+Toolchain Path:  C:\Keil_v5\ARM\ARMCC\Bin
+C Compiler:      Armcc.exe V5.06 update 2 (build 183)
+Assembler:       Armasm.exe V5.06 update 2 (build 183)
+Linker/Locator:  ArmLink.exe V5.06 update 2 (build 183)
+Library Manager: ArmAr.exe V5.06 update 2 (build 183)
+Hex Converter:   FromElf.exe V5.06 update 2 (build 183)
+CPU DLL:         SARMCM3.DLL V5.20
+Dialog DLL:      DCM.DLL V1.13.7.0
+Target DLL:      STLink\ST-LINKIII-KEIL_SWO.dll V2.0.18.0
+Dialog DLL:      TCM.DLL V1.14.9.0
+ 
+<h2>Project:</h2>
+C:\Users\Kilian\Downloads\en.stm32cubef7\STM32Cube_FW_F7_V1.4.0\Projects\RTE\Device\STM32F746NGHx\STCubeGenerated\MDK-ARM\STCubeGenerated.uvprojx
+Project File Date:  09/26/2016
+
+<h2>Output:</h2>
+*** Using Compiler 'V5.06 update 2 (build 183)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
+Build target 'STCubeGenerated'
+compiling main.c...
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_rcc_ex.h(2949): error:  #20: identifier "HAL_StatusTypeDef" is undefined
+  HAL_StatusTypeDef HAL_RCCEx_PeriphCLKConfig(RCC_PeriphCLKInitTypeDef  *PeriphClkInit);
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_rcc.h(1136): error:  #20: identifier "HAL_StatusTypeDef" is undefined
+  HAL_StatusTypeDef HAL_RCC_OscConfig(RCC_OscInitTypeDef *RCC_OscInitStruct);
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_rcc.h(1137): error:  #20: identifier "HAL_StatusTypeDef" is undefined
+  HAL_StatusTypeDef HAL_RCC_ClockConfig(RCC_ClkInitTypeDef *RCC_ClkInitStruct, uint32_t FLatency);
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_gpio.h(256): error:  #20: identifier "HAL_StatusTypeDef" is undefined
+  HAL_StatusTypeDef HAL_GPIO_LockPin(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin);
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_dma.h(162): error:  #20: identifier "HAL_LockTypeDef" is undefined
+    HAL_LockTypeDef            Lock;                                                         /*!< DMA locking object                     */  
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_dma_ex.h(127): error:  #20: identifier "HAL_StatusTypeDef" is undefined
+  HAL_StatusTypeDef HAL_DMAEx_MultiBufferStart(DMA_HandleTypeDef *hdma, uint32_t SrcAddress, uint32_t DstAddress, uint32_t SecondMemAddress, uint32_t DataLength);
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_dma_ex.h(128): error:  #20: identifier "HAL_StatusTypeDef" is undefined
+  HAL_StatusTypeDef HAL_DMAEx_MultiBufferStart_IT(DMA_HandleTypeDef *hdma, uint32_t SrcAddress, uint32_t DstAddress, uint32_t SecondMemAddress, uint32_t DataLength);
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_dma_ex.h(129): error:  #20: identifier "HAL_StatusTypeDef" is undefined
+  HAL_StatusTypeDef HAL_DMAEx_ChangeMemory(DMA_HandleTypeDef *hdma, uint32_t Address, HAL_DMA_MemoryTypeDef memory);
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_dma.h(645): error:  #20: identifier "HAL_StatusTypeDef" is undefined
+  HAL_StatusTypeDef HAL_DMA_Init(DMA_HandleTypeDef *hdma); 
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_dma.h(646): error:  #20: identifier "HAL_StatusTypeDef" is undefined
+  HAL_StatusTypeDef HAL_DMA_DeInit(DMA_HandleTypeDef *hdma);
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_dma.h(655): error:  #20: identifier "HAL_StatusTypeDef" is undefined
+  HAL_StatusTypeDef HAL_DMA_Start (DMA_HandleTypeDef *hdma, uint32_t SrcAddress, uint32_t DstAddress, uint32_t DataLength);
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_dma.h(656): error:  #20: identifier "HAL_StatusTypeDef" is undefined
+  HAL_StatusTypeDef HAL_DMA_Start_IT(DMA_HandleTypeDef *hdma, uint32_t SrcAddress, uint32_t DstAddress, uint32_t DataLength);
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_dma.h(657): error:  #20: identifier "HAL_StatusTypeDef" is undefined
+  HAL_StatusTypeDef HAL_DMA_Abort(DMA_HandleTypeDef *hdma);
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_dma.h(658): error:  #20: identifier "HAL_StatusTypeDef" is undefined
+  HAL_StatusTypeDef HAL_DMA_Abort_IT(DMA_HandleTypeDef *hdma);
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_dma.h(659): error:  #20: identifier "HAL_StatusTypeDef" is undefined
+  HAL_StatusTypeDef HAL_DMA_PollForTransfer(DMA_HandleTypeDef *hdma, HAL_DMA_LevelCompleteTypeDef CompleteLevel, uint32_t Timeout);
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_dma.h(661): error:  #20: identifier "HAL_StatusTypeDef" is undefined
+  HAL_StatusTypeDef HAL_DMA_CleanCallbacks(DMA_HandleTypeDef *hdma);
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_dma.h(662): error:  #20: identifier "HAL_StatusTypeDef" is undefined
+  HAL_StatusTypeDef HAL_DMA_RegisterCallback(DMA_HandleTypeDef *hdma, HAL_DMA_CallbackIDTypeDef CallbackID, void (* pCallback)(DMA_HandleTypeDef *_hdma));
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_dma.h(663): error:  #20: identifier "HAL_StatusTypeDef" is undefined
+  HAL_StatusTypeDef HAL_DMA_UnRegisterCallback(DMA_HandleTypeDef *hdma, HAL_DMA_CallbackIDTypeDef CallbackID);
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_flash.h(89): error:  #20: identifier "HAL_LockTypeDef" is undefined
+    HAL_LockTypeDef             Lock;               /* FLASH locking object                                                          */
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_flash_ex.h(457): error:  #20: identifier "HAL_StatusTypeDef" is undefined
+  HAL_StatusTypeDef HAL_FLASHEx_Erase(FLASH_EraseInitTypeDef *pEraseInit, uint32_t *SectorError);
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_flash_ex.h(458): error:  #20: identifier "HAL_StatusTypeDef" is undefined
+  HAL_StatusTypeDef HAL_FLASHEx_Erase_IT(FLASH_EraseInitTypeDef *pEraseInit);
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_flash_ex.h(459): error:  #20: identifier "HAL_StatusTypeDef" is undefined
+  HAL_StatusTypeDef HAL_FLASHEx_OBProgram(FLASH_OBProgramInitTypeDef *pOBInit);
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_flash.h(312): error:  #20: identifier "HAL_StatusTypeDef" is undefined
+  HAL_StatusTypeDef HAL_FLASH_Program(uint32_t TypeProgram, uint32_t Address, uint64_t Data);
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_flash.h(313): error:  #20: identifier "HAL_StatusTypeDef" is undefined
+  HAL_StatusTypeDef HAL_FLASH_Program_IT(uint32_t TypeProgram, uint32_t Address, uint64_t Data);
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_flash.h(327): error:  #20: identifier "HAL_StatusTypeDef" is undefined
+  HAL_StatusTypeDef HAL_FLASH_Unlock(void);
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_flash.h(328): error:  #20: identifier "HAL_StatusTypeDef" is undefined
+  HAL_StatusTypeDef HAL_FLASH_Lock(void);
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_flash.h(329): error:  #20: identifier "HAL_StatusTypeDef" is undefined
+  HAL_StatusTypeDef HAL_FLASH_OB_Unlock(void);
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_flash.h(330): error:  #20: identifier "HAL_StatusTypeDef" is undefined
+  HAL_StatusTypeDef HAL_FLASH_OB_Lock(void);
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_flash.h(332): error:  #20: identifier "HAL_StatusTypeDef" is undefined
+  HAL_StatusTypeDef HAL_FLASH_OB_Launch(void);
+../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_flash.h(342): error:  #20: identifier "HAL_StatusTypeDef" is undefined
+  HAL_StatusTypeDef FLASH_WaitForLastOperation(uint32_t Timeout);
+../Src/main.c: 0 warnings, 30 errors
+"STCubeGenerated\STCubeGenerated.axf" - 30 Error(s), 0 Warning(s).
+
+<h2>Software Packages used:</h2>
+
+Package Vendor: ARM
+                http://www.keil.com/pack/ARM.CMSIS.5.0.0-Beta4.pack
+                ARM::CMSIS:CORE:5.0.0
+                CMSIS (Cortex Microcontroller Software Interface Standard)
+   * Component: CORE Version: 5.0.0
+
+<h2>Collection of Component include folders:</h2>
+  C:\Users\Kilian\Downloads\en.stm32cubef7\STM32Cube_FW_F7_V1.4.0\Projects\RTE\Device\STM32F746NGHx\STCubeGenerated\MDK-ARM\RTE
+  C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.0-Beta4\CMSIS\Include
+  C:\Keil_v5\ARM\PACK\Keil\STM32F7xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32F7xx\Include
+
+<h2>Collection of Component Files used:</h2>
+
+   * Component: ARM::CMSIS:CORE:5.0.0
+Target not created.
+Build Time Elapsed:  00:00:01
+</pre>
+</body>
+</html>
