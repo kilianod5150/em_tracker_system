@@ -80,6 +80,20 @@ static void Error_Handler(void);
 static void CPU_CACHE_Enable(void);
 static void MPU_Config(void);
 static uint16_t Buffercmp(uint8_t* pBuffer1, uint8_t* pBuffer2, uint16_t BufferLength);
+void SystemClock_Config(void);
+static void Error_Handler(void);
+int16_t ADC_Read(void);
+
+/* SPI handler declaration */
+SPI_HandleTypeDef SpiHandle;
+
+
+
+
+float ADC_Output=0; // float variable used for debug for testing the ADC output
+//int16_t adc_msb,adc_lsb;
+
+
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -88,20 +102,27 @@ static uint16_t Buffercmp(uint8_t* pBuffer1, uint8_t* pBuffer2, uint16_t BufferL
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
-#define TRANSMITTER_BOARD
-//#define __FPU_PRESENT 1
+
+#define __FPU_PRESENT 1
+
 /* Private functions ---------------------------------------------------------*/
 /* UART handler declaration */
 UART_HandleTypeDef UartHandle;
 __IO ITStatus UartReady = RESET;
 __IO uint32_t UserButtonStatus = 0;  /* set to 1 after User Button interrupt  */
 
-/* Buffer used for transmission */
-uint8_t aTxBuffer[] = " ****UART_TwoBoards communication based on DMA****  ****UART_TwoBoards communication based on DMA****  ****UART_TwoBoards communication based on DMA***\n";
-uint8_t aTxBuffer2[] = " Hello World \n";
-uint8_t aTxBuffer3[256];
+/* Buffer used for UART transmission */
+uint8_t UART_TxBuffer[256];
+/* Buffer used for UART reception */
+uint8_t UART_RxBuffer[RXBUFFERSIZE];
+
+uint8_t SPI_TxBuffer[] = {0x8F, 0xCF};
 /* Buffer used for reception */
-uint8_t aRxBuffer[RXBUFFERSIZE];
+uint8_t SPI_RxBuffer[SPI_BUFFERSIZE];
+uint32_t errorcheck=0;
+/* transfer state */
+//__IO uint32_t wTransferState = TRANSFER_WAIT;
+
 uint32_t system_time =0;
 float32_t dummy[1];
 float32_t test[1];
@@ -122,7 +143,7 @@ float32_t Demod_Cosine_Signal_Filtered;
 float32_t MA_Filter_Array[1000];
 int32_t MA_Filter_Length=100;
 int32_t MA_Filter_Counter=0;
-
+int16_t ADC_Check_Global;
 float32_t FIR_Input[1];
 float32_t FIR_Output[1];
 
@@ -371,18 +392,37 @@ arm_fir_init_f32(&S, NUM_TAPS, (float32_t *)&firCoeffs32[0], &firStateF32[0], bl
 
   /* Configure the system clock to 216 MHz */
   SystemClock_Config();
+	
+	  /*##-1- Configure the SPI peripheral #######################################*/
+  /* Set the SPI parameters */
+  SpiHandle.Instance               = SPIx;
+  SpiHandle.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
+  SpiHandle.Init.Direction         = SPI_DIRECTION_2LINES;
+  SpiHandle.Init.CLKPhase          = SPI_PHASE_2EDGE;
+  SpiHandle.Init.CLKPolarity       = SPI_POLARITY_HIGH;
+  SpiHandle.Init.DataSize          = SPI_DATASIZE_8BIT;
+  SpiHandle.Init.FirstBit          = SPI_FIRSTBIT_MSB;
+  SpiHandle.Init.TIMode            = SPI_TIMODE_DISABLE;
+  SpiHandle.Init.CRCCalculation    = SPI_CRCCALCULATION_DISABLE;
+  SpiHandle.Init.CRCPolynomial     = 7;
+  SpiHandle.Init.NSS               = SPI_NSS_SOFT;
+
+
+  SpiHandle.Init.Mode = SPI_MODE_MASTER;
+
+  HAL_Delay(5);  
 
   /* Configure LED1 */
-  BSP_LED_Init(LED1);
-	
-	__GPIOB_CLK_ENABLE();
-	
-	GPIO_InitStruct.Mode  = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull  = GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-	GPIO_InitStruct.Pin = GPIO_PIN_15;
-	
-	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+//  BSP_LED_Init(LED1);
+//	
+//	__GPIOB_CLK_ENABLE();
+//	
+//	GPIO_InitStruct.Mode  = GPIO_MODE_INPUT;
+//  GPIO_InitStruct.Pull  = GPIO_PULLUP;
+//  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+//	GPIO_InitStruct.Pin = GPIO_PIN_15;
+//	
+//	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*##-1- Configure the TIM peripheral #######################################*/
   /* -----------------------------------------------------------------------
@@ -423,6 +463,9 @@ arm_fir_init_f32(&S, NUM_TAPS, (float32_t *)&firCoeffs32[0], &firStateF32[0], bl
   TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;
   TimHandle.Init.RepetitionCounter = 0;
 
+
+
+
   if (HAL_TIM_Base_Init(&TimHandle) != HAL_OK)
   {
     /* Initialization Error */
@@ -437,6 +480,9 @@ arm_fir_init_f32(&S, NUM_TAPS, (float32_t *)&firCoeffs32[0], &firStateF32[0], bl
     Error_Handler();
   }
 
+//	
+	
+	
 	  /*##-1- Configure the UART peripheral ######################################*/
   /* Put the USART peripheral in the Asynchronous mode (UART Mode) */
   /* UART configured as follows:
@@ -464,7 +510,40 @@ arm_fir_init_f32(&S, NUM_TAPS, (float32_t *)&firCoeffs32[0], &firStateF32[0], bl
   
 	
 
-	
+	    GPIO_InitTypeDef  gpio_init_structure_new; // define an object for the GPIO
+   	__HAL_RCC_GPIOI_CLK_ENABLE();  // D7 or PI3 is on port I so enable the GPIO update clock (although it isactually enabled already by the LEDs)
+
+	  gpio_init_structure_new.Pin = GPIO_PIN_0 | GPIO_PIN_3 ;
+		//gpio_init_structure.Pin = GPIO_PIN_0 ;
+    gpio_init_structure_new.Mode = GPIO_MODE_OUTPUT_PP;
+    gpio_init_structure_new.Pull = GPIO_NOPULL;
+    gpio_init_structure_new.Speed = GPIO_SPEED_HIGH;
+  
+    HAL_GPIO_Init(GPIOI, &gpio_init_structure_new); // initialise this GPIO
+    HAL_GPIO_WritePin(GPIOI, GPIO_PIN_3, GPIO_PIN_RESET);  // set low
+		HAL_GPIO_WritePin(GPIOI, GPIO_PIN_0, GPIO_PIN_SET);  // set CS pin high
+    HAL_Delay(1);  
+		
+		GPIO_InitTypeDef  gpio_init_structure_b; // define an object for the GPIO
+		__HAL_RCC_GPIOB_CLK_ENABLE();  // clock for port B gpios
+		gpio_init_structure_b.Pin = GPIO_PIN_8; 
+		gpio_init_structure_b.Mode = GPIO_MODE_OUTPUT_PP;
+    gpio_init_structure_b.Pull = GPIO_NOPULL;
+    gpio_init_structure_b.Speed = GPIO_SPEED_HIGH;
+		HAL_GPIO_Init(GPIOB, &gpio_init_structure_b); // initialise this GPIO
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);  // set high
+
+
+	HAL_Delay(1000);
+
+	 
+  if(HAL_SPI_Init(&SpiHandle) != HAL_OK)
+  {
+    /* Initialization Error */
+    Error_Handler();
+  }
+
+
 	
 	
 	
@@ -472,7 +551,19 @@ arm_fir_init_f32(&S, NUM_TAPS, (float32_t *)&firCoeffs32[0], &firStateF32[0], bl
   while (1)
   {
 		
-//		     HAL_Delay(500);
+		
+		
+		int16_t ADC_Check=ADC_Read();
+		ADC_Check_Global=ADC_Check;
+    HAL_Delay(1000);
+		sprintf(UART_TxBuffer,"ADC = %f (V) \n", ADC_Output );
+
+	//HAL_Delay(500);
+    HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)UART_TxBuffer, strlen(UART_TxBuffer));
+		
+		
+		
+		
 //	int	len=strlen(aTxBuffer2);
 //	  	HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer2, len);
 		
@@ -481,15 +572,15 @@ arm_fir_init_f32(&S, NUM_TAPS, (float32_t *)&firCoeffs32[0], &firStateF32[0], bl
 //		sprintf(aTxBuffer3,"Time = %d \n",system_time);
 		//HAL_Delay(500);
 //		HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer3, strlen(aTxBuffer3));
-		float x=0;
-		for(int i=0; i<1000000; i++)
-		{
+	//	float x=0;
+	//	for(int i=0; i<1000000; i++)
+	//	{
 			
 			//x=i*i;
 		//	arm_sin_cos_f32(i,test,dummy);
-			x=arm_cos_f32(i);
+	//		x=arm_cos_f32(i);
 		 // x=cosf(i);
-		}
+//	}
 	//	system_time=HAL_GetTick();
 	//	sprintf(aTxBuffer3,"Time = %d \n",system_time);
 		//HAL_Delay(500);
@@ -502,6 +593,58 @@ arm_fir_init_f32(&S, NUM_TAPS, (float32_t *)&firCoeffs32[0], &firStateF32[0], bl
   }
 }
 
+int16_t ADC_Read(void)
+{
+			HAL_GPIO_WritePin(GPIOI, GPIO_PIN_3, GPIO_PIN_SET);  // set high
+			//HAL_Delay(1); 
+  		HAL_GPIO_WritePin(GPIOI, GPIO_PIN_3, GPIO_PIN_RESET);  // set low
+		  HAL_Delay(1); 
+		
+		  /*##-2- Start the Full Duplex Communication process ########################*/  
+  /* While the SPI in TransmitReceive process, user can transmit data through 
+     "aTxBuffer" buffer & receive data through "aRxBuffer" */
+		HAL_GPIO_WritePin(GPIOI, GPIO_PIN_0, GPIO_PIN_RESET);  // set CS pin low
+		
+		  /*##-2- Start the Full Duplex Communication process ########################*/  
+  /* While the SPI in TransmitReceive process, user can transmit data through 
+     "aTxBuffer" buffer & receive data through "aRxBuffer" */
+  /* Timeout is set to 5S */
+  
+  switch(HAL_SPI_TransmitReceive(&SpiHandle, (uint8_t*)SPI_TxBuffer, (uint8_t *)SPI_RxBuffer, SPI_BUFFERSIZE, 5000))
+  {
+    case HAL_OK:
+      /* Communication is completed ___________________________________________ */
+
+
+      break;
+
+    case HAL_TIMEOUT:
+      /* An Error Occur ______________________________________________________ */
+    case HAL_ERROR:
+      /* Call Timeout Handler */
+      Error_Handler();
+      break;
+    default:
+      break;
+  }
+	
+  
+	HAL_GPIO_WritePin(GPIOI, GPIO_PIN_0, GPIO_PIN_SET);  // set CS pin high
+	
+	int16_t adc_msb=((int16_t)SPI_RxBuffer[0])<<8;
+	int16_t adc_lsb=(int16_t)SPI_RxBuffer[1];
+	int16_t ADC_Output_Int=adc_msb+adc_lsb;
+  ADC_Output=.000625*(float)(ADC_Output_Int);
+	return ADC_Output_Int;
+	
+}
+
+
+
+
+
+
+
 /**
   * @brief  Period elapsed callback in non blocking mode
   * @param  htim : TIM handle
@@ -509,19 +652,22 @@ arm_fir_init_f32(&S, NUM_TAPS, (float32_t *)&firCoeffs32[0], &firStateF32[0], bl
   */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-  BSP_LED_Toggle(LED1);
-	Test_Signal=V_Array[0]*arm_sin_f32(2*PI*F_Array[0]*clock_counter*Ts)+V_Array[1]*arm_sin_f32(2*PI*F_Array[1]*clock_counter*Ts)+V_Array[2]*arm_sin_f32(2*PI*F_Array[2]*clock_counter*Ts)+V_Array[3]*arm_sin_f32(2*PI*F_Array[3]*clock_counter*Ts)+V_Array[4]*arm_sin_f32(2*PI*F_Array[4]*clock_counter*Ts)+V_Array[5]*arm_sin_f32(2*PI*F_Array[5]*clock_counter*Ts)+V_Array[6]*arm_sin_f32(2*PI*F_Array[6]*clock_counter*Ts)+V_Array[7]*arm_sin_f32(2*PI*F_Array[7]*clock_counter*Ts);
-	Demod_Sine_Signal[0]=Test_Signal*arm_sin_f32(2*PI*F_Array[1]*clock_counter*Ts);
-	Demod_Cosine_Signal[0]=Test_Signal*arm_sin_f32(2*PI*F_Array[1]*clock_counter*Ts);
+//  BSP_LED_Toggle(LED1);
+	
+	//Test_Signal=V_Array[0]*arm_sin_f32(2*PI*F_Array[0]*clock_counter*Ts)+V_Array[1]*arm_sin_f32(2*PI*F_Array[1]*clock_counter*Ts)+V_Array[2]*arm_sin_f32(2*PI*F_Array[2]*clock_counter*Ts)+V_Array[3]*arm_sin_f32(2*PI*F_Array[3]*clock_counter*Ts)+V_Array[4]*arm_sin_f32(2*PI*F_Array[4]*clock_counter*Ts)+V_Array[5]*arm_sin_f32(2*PI*F_Array[5]*clock_counter*Ts)+V_Array[6]*arm_sin_f32(2*PI*F_Array[6]*clock_counter*Ts)+V_Array[7]*arm_sin_f32(2*PI*F_Array[7]*clock_counter*Ts);
+	//Demod_Sine_Signal[0]=Test_Signal*arm_sin_f32(2*PI*F_Array[1]*clock_counter*Ts);
+	//Demod_Cosine_Signal[0]=Test_Signal*arm_sin_f32(2*PI*F_Array[1]*clock_counter*Ts);
+	
 	//MA_Filter_Array[MA_Filter_Counter]
-	Square_Wave_Test=(arm_sin_f32(2*PI*F_Array[1]*clock_counter*Ts)>0)-(arm_sin_f32(2*PI*F_Array[1]*clock_counter*Ts)<0);
-	FIR_Input[0]=Demod_Sine_Signal[0];
-	 arm_fir_f32(&S, &FIR_Input[0], &FIR_Output[0], blockSize);
+	//Square_Wave_Test=(arm_sin_f32(2*PI*F_Array[1]*clock_counter*Ts)>0)-(arm_sin_f32(2*PI*F_Array[1]*clock_counter*Ts)<0);
+	//FIR_Input[0]=Demod_Sine_Signal[0];
+	// arm_fir_f32(&S, &FIR_Input[0], &FIR_Output[0], blockSize);
 	//sprintf(aTxBuffer3,"%.12f \t %.12f \t %.12f \t %d \n",Test_Signal,FIR_Output[0],Square_Wave_Test, GPIOB->IDR & 0x8000 );
-	sprintf(aTxBuffer3,"%d \n", GPIOB->IDR & 0x8000 );
+	//sprintf(aTxBuffer3,"%d \n", GPIOB->IDR & 0x8000 );
 
 	//HAL_Delay(500);
-  HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer3, strlen(aTxBuffer3));
+  //HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer3, strlen(aTxBuffer3));
+	
 	clock_counter++;
 }
 
@@ -669,9 +815,11 @@ static uint16_t Buffercmp(uint8_t* pBuffer1, uint8_t* pBuffer2, uint16_t BufferL
 static void Error_Handler(void)
 {
   /* Turn LED1 on */
-  BSP_LED_On(LED1);
+  //BSP_LED_On(LED1);
   while (1)
   {
+		HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_8);  // toggle pin
+		HAL_Delay(1000);
   }
 }
 #ifdef  USE_FULL_ASSERT
@@ -755,9 +903,9 @@ static void MPU_Config(void)
 void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
 {
   /* Configure LED1 which is shared with SPI2_SCK signal */
-  BSP_LED_Init(LED1);
+  //BSP_LED_Init(LED1);
   /* Turn LED1 on: Transfer in transmission/reception process is complete */
-  BSP_LED_On(LED1);
+  //BSP_LED_On(LED1);
   wTransferState = TRANSFER_COMPLETE;
 }
 

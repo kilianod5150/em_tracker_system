@@ -945,12 +945,12 @@ ARM Macro Assembler    Page 15
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M7.fp.sp --apcs=
 interwork --depend=stm32746g_discovery\startup_stm32f746xx.d -ostm32746g_discov
 ery\startup_stm32f746xx.o -IE:\em_tracker_system\en.stm32cubef7\STM32Cube_FW_F7
-_V1.4.0\Projects\STM32746G-Discovery\Examples\TIM\TIM_TimeBase\MDK-ARM\RTE -IC:
-\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.0-Beta4\CMSIS\Include -IC:\Keil_v5\ARM\PACK\Kei
-l\STM32F7xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32F7xx\Include --predefine="__
-EVAL SETA 1" --predefine="__MICROLIB SETA 1" --predefine="__UVISION_VERSION SET
-A 520" --predefine="_RTE_ SETA 1" --predefine="STM32F746xx SETA 1" --list=start
-up_stm32f746xx.lst startup_stm32f746xx.s
+_V1.4.0\Projects\STM32746G-Discovery\Examples\Main_Project\TIM_TimeBase\MDK-ARM
+\RTE -IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.0-Beta4\CMSIS\Include -IC:\Keil_v5\ARM
+\PACK\Keil\STM32F7xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32F7xx\Include --pred
+efine="__EVAL SETA 1" --predefine="__MICROLIB SETA 1" --predefine="__UVISION_VE
+RSION SETA 520" --predefine="_RTE_ SETA 1" --predefine="STM32F746xx SETA 1" --l
+ist=startup_stm32f746xx.lst startup_stm32f746xx.s
 
 
 

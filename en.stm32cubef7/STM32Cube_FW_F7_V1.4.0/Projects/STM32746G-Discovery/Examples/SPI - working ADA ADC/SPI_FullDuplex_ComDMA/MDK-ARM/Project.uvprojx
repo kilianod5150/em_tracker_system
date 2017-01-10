@@ -385,9 +385,6 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>::CMSIS</GroupName>
-        </Group>
-        <Group>
           <GroupName>Doc</GroupName>
           <Files>
             <File>
@@ -496,6 +493,9 @@
               <FilePath>../../../../../../Drivers/BSP/STM32746G-Discovery/stm32746g_discovery.c</FilePath>
             </File>
           </Files>
+        </Group>
+        <Group>
+          <GroupName>::CMSIS</GroupName>
         </Group>
       </Groups>
     </Target>

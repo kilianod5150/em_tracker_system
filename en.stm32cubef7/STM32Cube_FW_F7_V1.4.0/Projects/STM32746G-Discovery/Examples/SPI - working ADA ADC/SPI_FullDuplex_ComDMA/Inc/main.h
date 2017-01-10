@@ -40,7 +40,9 @@
 #define __MAIN_H
 
 /* Includes ------------------------------------------------------------------*/
+#include "stm32f7xx_hal.h"
 #include "stm32746g_discovery.h"
+#include "stm32f7xx_hal_spi.h"
 
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
@@ -49,7 +51,7 @@
 /* Definition for SPIx clock resources */
 #define SPIx                             SPI2
 #define SPIx_CLK_ENABLE()                __HAL_RCC_SPI2_CLK_ENABLE()
-#define DMAx_CLK_ENABLE()                __HAL_RCC_DMA1_CLK_ENABLE()
+//#define DMAx_CLK_ENABLE()                __HAL_RCC_DMA1_CLK_ENABLE()
 #define SPIx_SCK_GPIO_CLK_ENABLE()       __HAL_RCC_GPIOI_CLK_ENABLE()
 #define SPIx_MISO_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOB_CLK_ENABLE()
 #define SPIx_MOSI_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOB_CLK_ENABLE()
@@ -88,6 +90,54 @@
 /* Size of buffer */
 #define BUFFERSIZE                       (COUNTOF(aTxBuffer))
 
+/* Exported macro ------------------------------------------------------------*/
+#define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
+/* Exported functions ------------------------------------------------------- */
+
+
+
+/* User can use this section to tailor USARTx/UARTx instance used and associated 
+   resources */
+/* Definition for USARTx clock resources */
+#define USARTx                           USART6
+#define USARTx_CLK_ENABLE()              __USART6_CLK_ENABLE()
+#define DMAx_CLK_ENABLE()                __HAL_RCC_DMA2_CLK_ENABLE()
+#define USARTx_RX_GPIO_CLK_ENABLE()      __GPIOC_CLK_ENABLE()
+#define USARTx_TX_GPIO_CLK_ENABLE()      __GPIOC_CLK_ENABLE()
+
+#define USARTx_FORCE_RESET()             __USART6_FORCE_RESET()
+#define USARTx_RELEASE_RESET()           __USART6_RELEASE_RESET()
+
+/* Definition for USARTx Pins */
+#define USARTx_TX_PIN                    GPIO_PIN_6
+#define USARTx_TX_GPIO_PORT              GPIOC
+#define USARTx_TX_AF                     GPIO_AF8_USART6
+#define USARTx_RX_PIN                    GPIO_PIN_7
+#define USARTx_RX_GPIO_PORT              GPIOC
+#define USARTx_RX_AF                     GPIO_AF8_USART6
+
+/* Definition for USARTx's DMA */
+#define USARTx_TX_DMA_STREAM              DMA2_Stream6
+#define USARTx_RX_DMA_STREAM              DMA2_Stream1
+#define USARTx_TX_DMA_CHANNEL             DMA_CHANNEL_5
+#define USARTx_RX_DMA_CHANNEL             DMA_CHANNEL_5
+
+
+/* Definition for USARTx's NVIC */
+#define USARTx_DMA_TX_IRQn                DMA2_Stream6_IRQn
+#define USARTx_DMA_RX_IRQn                DMA2_Stream1_IRQn
+#define USARTx_DMA_TX_IRQHandler          DMA2_Stream6_IRQHandler
+#define USARTx_DMA_RX_IRQHandler          DMA2_Stream1_IRQHandler
+
+/* Definition for USARTx's NVIC */
+#define USARTx_IRQn                      USART6_IRQn
+#define USARTx_IRQHandler                USART6_IRQHandler
+
+/* Size of Trasmission buffer */
+#define TXBUFFERSIZE                      (COUNTOF(aTxBuffer) - 1)
+/* Size of Reception buffer */
+#define RXBUFFERSIZE                      TXBUFFERSIZE
+  
 /* Exported macro ------------------------------------------------------------*/
 #define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
 /* Exported functions ------------------------------------------------------- */

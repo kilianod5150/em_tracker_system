@@ -21,44 +21,27 @@ Target DLL:      STLink\ST-LINKIII-KEIL_SWO.dll V2.0.18.0
 Dialog DLL:      TCM.DLL V1.14.9.0
  
 <h2>Project:</h2>
-E:\em_tracker_system\en.stm32cubef7\STM32Cube_FW_F7_V1.4.0\Projects\STM32746G-Discovery\Examples\TIM\TIM_TimeBase\MDK-ARM\Project.uvprojx
+E:\em_tracker_system\en.stm32cubef7\STM32Cube_FW_F7_V1.4.0\Projects\STM32746G-Discovery\Examples\Main_Project\TIM_TimeBase\MDK-ARM\Project.uvprojx
 Project File Date:  10/10/2016
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 2 (build 183)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'STM32746G_DISCOVERY'
-assembling startup_stm32f746xx.s...
-compiling system_stm32f7xx.c...
 compiling main.c...
-../Src/main.c(484): warning:  #550-D: variable "x" was set but never used
-  		float x=0;
-../Src/main.c(521): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
-  	sprintf(aTxBuffer3,"%d \n", 
-PIOB->IDR & 0x8000 );
-../Src/main.c(524): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "const char *"
-    HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer3, strlen(aTxBuffer3));
-../Src/main.c(654): warning:  #177-D: function "Buffercmp" was declared but never referenced
+../Src/main.c(559): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
+  		sprintf(UART_TxBuffer,"ADC = %f (V) \n", ADC_Output );
+../Src/main.c(562): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "const char *"
+      HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)UART_TxBuffer, strlen(UART_TxBuffer));
+../Src/main.c(637): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+    ADC_Output=.000625*(float)(ADC_Output_Int);
+../Src/main.c(75): warning:  #177-D: variable "GPIO_InitStruct" was declared but never referenced
+  static GPIO_InitTypeDef  GPIO_InitStruct;
+../Src/main.c(800): warning:  #177-D: function "Buffercmp" was declared but never referenced
   static uint16_t Buffercmp(uint8_t* pBuffer1, uint8_t* pBuffer2, uint16_t BufferLength)
-../Src/main.c: 4 warnings, 0 errors
-compiling stm32f7xx_hal_msp.c...
-compiling stm32f7xx_it.c...
-compiling stm32f7xx_hal_gpio.c...
-compiling stm32f7xx_hal_tim_ex.c...
-compiling stm32f7xx_hal_dma.c...
-compiling stm32f7xx_hal_i2c.c...
-compiling stm32f7xx_hal_rcc_ex.c...
-compiling stm32f7xx_hal_cortex.c...
-compiling stm32f7xx_hal_rcc.c...
-compiling stm32f7xx_hal_uart.c...
-compiling stm32f7xx_hal_pwr_ex.c...
-compiling stm32f7xx_hal.c...
-compiling stm32f7xx_hal_tim.c...
-compiling stm32f7xx_hal_i2c_ex.c...
-compiling stm32f7xx_hal_spi.c...
-compiling stm32746g_discovery.c...
+../Src/main.c: 5 warnings, 0 errors
 linking...
-Program Size: Code=10672 RO-data=6596 RW-data=124 ZI-data=5972  
-"STM32746G_DISCOVERY\STM32746G_DISCOVERY.axf" - 0 Error(s), 4 Warning(s).
+Program Size: Code=13512 RO-data=4520 RW-data=40 ZI-data=5760  
+"STM32746G_DISCOVERY\STM32746G_DISCOVERY.axf" - 0 Error(s), 5 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -69,14 +52,14 @@ Package Vendor: ARM
    * Component: CORE Version: 5.0.0
 
 <h2>Collection of Component include folders:</h2>
-  E:\em_tracker_system\en.stm32cubef7\STM32Cube_FW_F7_V1.4.0\Projects\STM32746G-Discovery\Examples\TIM\TIM_TimeBase\MDK-ARM\RTE
+  E:\em_tracker_system\en.stm32cubef7\STM32Cube_FW_F7_V1.4.0\Projects\STM32746G-Discovery\Examples\Main_Project\TIM_TimeBase\MDK-ARM\RTE
   C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.0-Beta4\CMSIS\Include
   C:\Keil_v5\ARM\PACK\Keil\STM32F7xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32F7xx\Include
 
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.0.0
-Build Time Elapsed:  00:01:02
+Build Time Elapsed:  00:00:05
 </pre>
 </body>
 </html>
