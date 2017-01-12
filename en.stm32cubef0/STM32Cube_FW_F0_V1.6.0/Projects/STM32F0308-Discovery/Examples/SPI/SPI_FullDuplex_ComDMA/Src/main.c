@@ -58,10 +58,11 @@
 /* Private variables ---------------------------------------------------------*/
 /* SPI handler declaration */
 SPI_HandleTypeDef SpiHandle;
-
+/* UART handler declaration */
+UART_HandleTypeDef UartHandle;
 /* Buffer used for transmission */
-uint8_t aTxBuffer[] = "****SPI - Two Boards communication based on DMA **** SPI Message ******** SPI Message ******** SPI Message ****";
-
+uint8_t aTxBuffer[] = "hello";
+uint8_t otherbuffer[] = "HELLO \n\n";
 /* Buffer used for reception */
 uint8_t aRxBuffer[BUFFERSIZE];
 
@@ -96,28 +97,68 @@ int main(void)
 
   /* Configure the system clock to 48 MHz */
   SystemClock_Config();
+	
+	  /*##-1- Configure the UART peripheral ######################################*/
+  /* Put the USART peripheral in the Asynchronous mode (UART Mode) */
+  /* UART configured as follows:
+      - Word Length = 8 Bits
+      - Stop Bit = One Stop bit
+      - Parity = None
+      - BaudRate = 9600 baud
+      - Hardware flow control disabled (RTS and CTS signals) */
+  UartHandle.Instance        = USARTx;
+
+  UartHandle.Init.BaudRate   = 9600;
+  UartHandle.Init.WordLength = UART_WORDLENGTH_8B;
+  UartHandle.Init.StopBits   = UART_STOPBITS_1;
+  UartHandle.Init.Parity     = UART_PARITY_NONE;
+  UartHandle.Init.HwFlowCtl  = UART_HWCONTROL_NONE;
+  UartHandle.Init.Mode       = UART_MODE_TX_RX;
+  UartHandle.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  if(HAL_UART_DeInit(&UartHandle) != HAL_OK)
+  {
+    Error_Handler();
+  }  
+  if(HAL_UART_Init(&UartHandle) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  
+			  /*##-2- Start the transmission process #####################################*/  
+  /* While the UART in reception process, user can transmit data through 
+     "aTxBuffer" buffer */
+  if(HAL_UART_Transmit(&UartHandle, (uint8_t*)otherbuffer, strlen(otherbuffer), 5000)!= HAL_OK)
+  {
+    Error_Handler();   
+  }
+	
+
 
   /*##-1- Configure the SPI peripheral #######################################*/
   /* Set the SPI parameters */
   SpiHandle.Instance               = SPIx;
-  SpiHandle.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
+  SpiHandle.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
   SpiHandle.Init.Direction         = SPI_DIRECTION_2LINES;
   SpiHandle.Init.CLKPhase          = SPI_PHASE_1EDGE;
-  SpiHandle.Init.CLKPolarity       = SPI_POLARITY_LOW;
+  SpiHandle.Init.CLKPolarity       = SPI_POLARITY_HIGH;
   SpiHandle.Init.CRCCalculation    = SPI_CRCCALCULATION_DISABLE;
   SpiHandle.Init.CRCPolynomial     = 7;
   SpiHandle.Init.DataSize          = SPI_DATASIZE_8BIT;
   SpiHandle.Init.FirstBit          = SPI_FIRSTBIT_MSB;
   SpiHandle.Init.NSS               = SPI_NSS_SOFT;
   SpiHandle.Init.TIMode            = SPI_TIMODE_DISABLE;
-  SpiHandle.Init.NSSPMode          = SPI_NSS_PULSE_DISABLE;
-  SpiHandle.Init.CRCLength         = SPI_CRC_LENGTH_8BIT;
+  //SpiHandle.Init.NSSPMode          = SPI_NSS_PULSE_DISABLE;
+  //SpiHandle.Init.CRCLength         = SPI_CRC_LENGTH_8BIT;
 
 #ifdef MASTER_BOARD
   SpiHandle.Init.Mode = SPI_MODE_MASTER;
 #else
   SpiHandle.Init.Mode = SPI_MODE_SLAVE;
 #endif /* MASTER_BOARD */
+
+  /* Slave board must wait until Master Board is ready. This to guarantee the 
+     correctness of transmitted/received data */
+  HAL_Delay(5);  
 
   if (HAL_SPI_Init(&SpiHandle) != HAL_OK)
   {
@@ -153,17 +194,36 @@ int main(void)
       For simplicity reasons, this example is just waiting till the end of the 
       transfer, but application may perform other tasks while transfer operation
       is ongoing. */  
-  while (HAL_SPI_GetState(&SpiHandle) != HAL_SPI_STATE_READY)
-  {
-  } 
+ // HAL_Delay(1);
+	
+//	while (HAL_SPI_GetState(&SpiHandle) != HAL_SPI_STATE_READY)
+//  {
+//  } 
+//   
+	//HAL_Delay(1);
+	
 
-  /*##-4- Compare the sent and received buffers ##############################*/
-  if(Buffercmp((uint8_t*)aTxBuffer, (uint8_t*)aRxBuffer, BUFFERSIZE))
-  {
-    /* Processing Error */
-    Error_Handler();     
-  }
+	
+		
+//	  if(HAL_UART_Transmit(&UartHandle, (uint8_t*)aRxBuffer, BUFFERSIZE, 5000)!= HAL_OK)
+//  {
+//    Error_Handler();   
+//  }
+	
+	
+	
+	
+//  /*##-4- Compare the sent and received buffers ##############################*/
+//  if(Buffercmp((uint8_t*)aTxBuffer, (uint8_t*)aRxBuffer, BUFFERSIZE))
+//  {
+//    /* Processing Error */
+//    Error_Handler();     
+//  }
 
+
+	
+	
+	
   /* Infinite loop */  
   while (1)
   {
@@ -222,6 +282,12 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
 {
   /* Turn LED3 on: Transfer in transmission/reception process is correct */
   BSP_LED_On(LED3);
+	
+		  if(HAL_UART_Transmit(&UartHandle, (uint8_t*)aRxBuffer, BUFFERSIZE, 5000)!= HAL_OK)
+  {
+    Error_Handler();   
+  }
+	
 }
 
 /**
@@ -248,6 +314,8 @@ static void Error_Handler(void)
   BSP_LED_On(LED4);
   while (1)
   {
+		BSP_LED_Toggle(LED4);
+    HAL_Delay(1000);
   }
 }
 
@@ -272,6 +340,21 @@ static uint16_t Buffercmp(uint8_t* pBuffer1, uint8_t* pBuffer2, uint16_t BufferL
 
   return 0;
 }
+
+/**
+  * @brief  UART error callbacks
+  * @param  UartHandle: UART handle
+  * @note   This example shows a simple way to report transfer error, and you can
+  *         add your own implementation.
+  * @retval None
+  */
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *UartHandle)
+{
+    Error_Handler();
+}
+
+
+
 
 #ifdef  USE_FULL_ASSERT
 /**

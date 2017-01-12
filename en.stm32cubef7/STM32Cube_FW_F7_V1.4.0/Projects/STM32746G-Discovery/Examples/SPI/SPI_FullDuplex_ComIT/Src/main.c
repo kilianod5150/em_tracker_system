@@ -59,14 +59,14 @@ enum {
 
 /* Private macro -------------------------------------------------------------*/
 /* Uncomment this line to use the board as master, if not it is used as slave */
-//#define MASTER_BOARD
+#define MASTER_BOARD
 
 /* Private variables ---------------------------------------------------------*/
 /* SPI handler declaration */
 SPI_HandleTypeDef SpiHandle;
 
 /* Buffer used for transmission */
-uint8_t aTxBuffer[] = "****SPI - Two Boards communication based on Interrupt **** SPI Message ******** SPI Message ******** SPI Message ****";
+uint8_t aTxBuffer[] = "hello";
 
 /* Buffer used for reception */
 uint8_t aRxBuffer[BUFFERSIZE];
@@ -143,6 +143,7 @@ int main(void)
   }
   
 #ifdef MASTER_BOARD
+	
   /* Configure User push-button button */
   BSP_PB_Init(BUTTON_KEY,BUTTON_MODE_GPIO);
   /* Wait for User push-button press before starting the Communication */

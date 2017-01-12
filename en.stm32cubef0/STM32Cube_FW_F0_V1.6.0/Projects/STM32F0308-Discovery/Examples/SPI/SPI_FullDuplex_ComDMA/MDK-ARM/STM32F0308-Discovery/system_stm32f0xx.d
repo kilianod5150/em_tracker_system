@@ -24,3 +24,5 @@ stm32f0308-discovery\system_stm32f0xx.o: ..\..\..\..\..\..\Drivers\STM32F0xx_HAL
 stm32f0308-discovery\system_stm32f0xx.o: ..\..\..\..\..\..\Drivers\STM32F0xx_HAL_Driver\Inc\stm32f0xx_hal_flash_ex.h
 stm32f0308-discovery\system_stm32f0xx.o: ..\..\..\..\..\..\Drivers\STM32F0xx_HAL_Driver\Inc\stm32f0xx_hal_spi.h
 stm32f0308-discovery\system_stm32f0xx.o: ..\..\..\..\..\..\Drivers\STM32F0xx_HAL_Driver\Inc\stm32f0xx_hal_spi_ex.h
+stm32f0308-discovery\system_stm32f0xx.o: ..\..\..\..\..\..\Drivers\STM32F0xx_HAL_Driver\Inc\stm32f0xx_hal_uart.h
+stm32f0308-discovery\system_stm32f0xx.o: ..\..\..\..\..\..\Drivers\STM32F0xx_HAL_Driver\Inc\stm32f0xx_hal_uart_ex.h
