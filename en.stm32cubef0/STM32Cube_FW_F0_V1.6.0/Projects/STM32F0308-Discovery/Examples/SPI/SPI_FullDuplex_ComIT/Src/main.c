@@ -59,9 +59,12 @@
 /* SPI handler declaration */
 SPI_HandleTypeDef SpiHandle;
 
-/* Buffer used for transmission */
-uint8_t aTxBuffer[] = "****SPI - Two Boards communication based on Interrupt **** SPI Message ******** SPI Message ******** SPI Message ****";
+/* UART handler declaration */
+UART_HandleTypeDef UartHandle;
 
+/* Buffer used for transmission */
+uint8_t aTxBuffer[] = "hello";
+uint8_t otherbuffer[] = "HELLO \n\n";
 /* Buffer used for reception */
 uint8_t aRxBuffer[BUFFERSIZE];
 
@@ -96,6 +99,42 @@ int main(void)
 
   /* Configure the system clock to 48 MHz */
   SystemClock_Config();
+	
+		  /*##-1- Configure the UART peripheral ######################################*/
+  /* Put the USART peripheral in the Asynchronous mode (UART Mode) */
+  /* UART configured as follows:
+      - Word Length = 8 Bits
+      - Stop Bit = One Stop bit
+      - Parity = None
+      - BaudRate = 9600 baud
+      - Hardware flow control disabled (RTS and CTS signals) */
+  UartHandle.Instance        = USARTx;
+
+  UartHandle.Init.BaudRate   = 9600;
+  UartHandle.Init.WordLength = UART_WORDLENGTH_8B;
+  UartHandle.Init.StopBits   = UART_STOPBITS_1;
+  UartHandle.Init.Parity     = UART_PARITY_NONE;
+  UartHandle.Init.HwFlowCtl  = UART_HWCONTROL_NONE;
+  UartHandle.Init.Mode       = UART_MODE_TX_RX;
+  UartHandle.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  if(HAL_UART_DeInit(&UartHandle) != HAL_OK)
+  {
+    Error_Handler();
+  }  
+  if(HAL_UART_Init(&UartHandle) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  
+			  /*##-2- Start the transmission process #####################################*/  
+  /* While the UART in reception process, user can transmit data through 
+     "aTxBuffer" buffer */
+  if(HAL_UART_Transmit(&UartHandle, (uint8_t*)otherbuffer, strlen(otherbuffer), 5000)!= HAL_OK)
+  {
+    Error_Handler();   
+  }
+	
+	HAL_Delay(50);
 
   /*##-1- Configure the SPI peripheral #######################################*/
   /* Set the SPI parameters */
@@ -103,7 +142,7 @@ int main(void)
   SpiHandle.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
   SpiHandle.Init.Direction         = SPI_DIRECTION_2LINES;
   SpiHandle.Init.CLKPhase          = SPI_PHASE_1EDGE;
-  SpiHandle.Init.CLKPolarity       = SPI_POLARITY_LOW;
+  SpiHandle.Init.CLKPolarity       = SPI_POLARITY_HIGH;
   SpiHandle.Init.CRCCalculation    = SPI_CRCCALCULATION_DISABLE;
   SpiHandle.Init.CRCPolynomial     = 7;
   SpiHandle.Init.DataSize          = SPI_DATASIZE_8BIT;
@@ -113,11 +152,13 @@ int main(void)
   SpiHandle.Init.NSSPMode          = SPI_NSS_PULSE_DISABLE;
   SpiHandle.Init.CRCLength         = SPI_CRC_LENGTH_8BIT;
 
-#ifdef MASTER_BOARD
-  SpiHandle.Init.Mode = SPI_MODE_MASTER;
-#else
+//#ifdef MASTER_BOARD
+//  SpiHandle.Init.Mode = SPI_MODE_MASTER;
+//#else
   SpiHandle.Init.Mode = SPI_MODE_SLAVE;
-#endif /* MASTER_BOARD */
+//#endif /* MASTER_BOARD */
+
+HAL_Delay(1);
 
   if(HAL_SPI_Init(&SpiHandle) != HAL_OK)
   {
@@ -125,18 +166,20 @@ int main(void)
     Error_Handler();
   }
   
-#ifdef MASTER_BOARD
-  /* Configure Tamper push button */
-  BSP_PB_Init(BUTTON_USER, BUTTON_MODE_GPIO);
-  /* Wait for Tamper Button press before starting the Communication */
-  while (BSP_PB_GetState(BUTTON_USER) != GPIO_PIN_SET)
-  {
-    BSP_LED_Toggle(LED3);
-    HAL_Delay(40);
-  }
-  BSP_LED_Off(LED3);
-#endif /* MASTER_BOARD */
+//#ifdef MASTER_BOARD
+//  /* Configure Tamper push button */
+//  BSP_PB_Init(BUTTON_USER, BUTTON_MODE_GPIO);
+//  /* Wait for Tamper Button press before starting the Communication */
+//  while (BSP_PB_GetState(BUTTON_USER) != GPIO_PIN_SET)
+//  {
+//    BSP_LED_Toggle(LED3);
+//    HAL_Delay(40);
+//  }
+//  BSP_LED_Off(LED3);
+//#endif /* MASTER_BOARD */
 
+	HAL_Delay(1);
+	
   /*##-2- Start the Full Duplex Communication process ########################*/  
   /* While the SPI in TransmitReceive process, user can transmit data through 
      "aTxBuffer" buffer & receive data through "aRxBuffer" */
@@ -157,6 +200,12 @@ int main(void)
   {
   } 
 
+		  if(HAL_UART_Transmit(&UartHandle, (uint8_t*)aRxBuffer, BUFFERSIZE, 5000)!= HAL_OK)
+  {
+    Error_Handler();   
+  }
+	
+	
   /*##-4- Compare the sent and received buffers ##############################*/
   if(Buffercmp((uint8_t*)aTxBuffer, (uint8_t*)aRxBuffer, BUFFERSIZE))
   {

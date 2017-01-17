@@ -63,6 +63,7 @@ UART_HandleTypeDef UartHandle;
 /* Buffer used for transmission */
 uint8_t aTxBuffer[] = "hello";
 uint8_t otherbuffer[] = "HELLO \n\n";
+uint8_t otherbuffer2[] = "\n";
 /* Buffer used for reception */
 uint8_t aRxBuffer[BUFFERSIZE];
 
@@ -70,9 +71,10 @@ uint8_t aRxBuffer[BUFFERSIZE];
 static void SystemClock_Config(void);
 static void Error_Handler(void);
 static uint16_t Buffercmp(uint8_t *pBuffer1, uint8_t *pBuffer2, uint16_t BufferLength);
-
+static void Timeout_Error_Handler(void);
+static void EXTI0_1_IRQHandler_Config(void);
 /* Private functions ---------------------------------------------------------*/
-
+uint8_t SPI_Flag=0;
 /**
   * @brief  Main program
   * @param  None
@@ -98,6 +100,10 @@ int main(void)
   /* Configure the system clock to 48 MHz */
   SystemClock_Config();
 	
+	  /* -2- Configure EXTI_Line0 (connected to PA.00 pin) in interrupt mode */
+  EXTI0_1_IRQHandler_Config();
+
+
 	  /*##-1- Configure the UART peripheral ######################################*/
   /* Put the USART peripheral in the Asynchronous mode (UART Mode) */
   /* UART configured as follows:
@@ -146,6 +152,7 @@ int main(void)
   SpiHandle.Init.DataSize          = SPI_DATASIZE_8BIT;
   SpiHandle.Init.FirstBit          = SPI_FIRSTBIT_MSB;
   SpiHandle.Init.NSS               = SPI_NSS_SOFT;
+	//SpiHandle.Init.NSS               = SPI_NSS_HARD_OUTPUT;
   SpiHandle.Init.TIMode            = SPI_TIMODE_DISABLE;
   //SpiHandle.Init.NSSPMode          = SPI_NSS_PULSE_DISABLE;
   //SpiHandle.Init.CRCLength         = SPI_CRC_LENGTH_8BIT;
@@ -166,17 +173,19 @@ int main(void)
     Error_Handler();
   }
 
-#ifdef MASTER_BOARD
-  /* Configure the push button */
-  BSP_PB_Init(BUTTON_USER, BUTTON_MODE_GPIO);
-  /* Wait for Button press before starting the Communication */
-  while (BSP_PB_GetState(BUTTON_USER) != GPIO_PIN_SET)
-  {
-    BSP_LED_Toggle(LED3);
-    HAL_Delay(100);
-  }
-  BSP_LED_Off(LED3);
-#endif /* MASTER_BOARD */
+	HAL_Delay(5);
+	
+//#ifdef MASTER_BOARD
+//  /* Configure the push button */
+//  BSP_PB_Init(BUTTON_USER, BUTTON_MODE_GPIO);
+//  /* Wait for Button press before starting the Communication */
+//  while (BSP_PB_GetState(BUTTON_USER) != GPIO_PIN_SET)
+//  {
+//    BSP_LED_Toggle(LED3);
+//    HAL_Delay(100);
+//  }
+//  BSP_LED_Off(LED3);
+//#endif /* MASTER_BOARD */
 
   /*##-2- Start the Full Duplex Communication process ########################*/  
   /* While the SPI in TransmitReceive process, user can transmit data through 
@@ -196,10 +205,10 @@ int main(void)
       is ongoing. */  
  // HAL_Delay(1);
 	
-//	while (HAL_SPI_GetState(&SpiHandle) != HAL_SPI_STATE_READY)
+//while (HAL_SPI_GetState(&SpiHandle) != HAL_SPI_STATE_READY)
 //  {
-//  } 
-//   
+// } 
+  
 	//HAL_Delay(1);
 	
 
@@ -222,13 +231,127 @@ int main(void)
 
 
 	
+  /*##-2- Start the Full Duplex Communication process ########################*/  
+  /* While the SPI in TransmitReceive process, user can transmit data through 
+     "aTxBuffer" buffer & receive data through "aRxBuffer" */
+  /* Timeout is set to 5S */
+  
+//  switch(HAL_SPI_TransmitReceive(&SpiHandle, (uint8_t*)aTxBuffer, (uint8_t *)aRxBuffer, BUFFERSIZE, 5000))
+//  {
+//    case HAL_OK:
+//      /* Communication is completed ___________________________________________ */
+//      /* Compare the sent and received buffers */
+//		
+//			  if(HAL_UART_Transmit(&UartHandle, (uint8_t*)aRxBuffer, BUFFERSIZE, 5000)!= HAL_OK)
+//  {
+//    Error_Handler();   
+//  }
+//		
+//		
+//      if (Buffercmp((uint8_t *)aTxBuffer, (uint8_t *)aRxBuffer, BUFFERSIZE))
+//      {
+//        /* Transfer error in transmission process */
+//        Error_Handler();
+//      }
+//      /* Turn LED2 on: Transfer in transmission/Reception process is correct */
+//      BSP_LED_On(LED3);
+//      break;
+
+//    case HAL_TIMEOUT:
+//      /* A Timeout Occur ______________________________________________________*/
+//      /* Call Timeout Handler */
+//      Timeout_Error_Handler();
+//      break;
+//      /* An Error Occur ______________________________________________________ */
+//    case HAL_ERROR:
+//      /* Call Timeout Handler */
+//      Error_Handler();
+//      break;
+//    default:
+//      break;
+//  }
 	
 	
   /* Infinite loop */  
   while (1)
   {
+		
+		
+		if( (SPI_Flag==1) && (HAL_SPI_STATE_READY) )
+		{
+			
+			  if (HAL_SPI_DeInit(&SpiHandle) != HAL_OK)
+  {
+    /* Initialization Error */
+    Error_Handler();
+  }
+	
+				  if (HAL_SPI_Init(&SpiHandle) != HAL_OK)
+  {
+    /* Initialization Error */
+    Error_Handler();
+  }
+	
+	
+		  if(HAL_SPI_TransmitReceive_DMA(&SpiHandle, (uint8_t*)aTxBuffer, (uint8_t *)aRxBuffer, BUFFERSIZE) != HAL_OK)
+  {
+    /* Transfer error in transmission process */
+    Error_Handler();
+  }
+		
+	while (HAL_SPI_GetState(&SpiHandle) != HAL_SPI_STATE_READY)
+  {
+  } 
+  SPI_Flag=0;
+	
+	HAL_Delay(1);
+  }
+		
+	
+		HAL_Delay(10);
   }
 }
+
+/**
+  * @brief  Configures EXTI line 0 (connected to PA.00 pin) in interrupt mode
+  * @param  None
+  * @retval None
+  */
+static void EXTI0_1_IRQHandler_Config(void)
+{
+  GPIO_InitTypeDef   GPIO_InitStructure;
+
+  /* Enable GPIOA clock */
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+
+  /* Configure PA.00 pin as input floating */
+  GPIO_InitStructure.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStructure.Pull = GPIO_NOPULL;
+  GPIO_InitStructure.Pin = GPIO_PIN_0;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+  /* Enable and set EXTI line 0 Interrupt to the lowest priority */
+  HAL_NVIC_SetPriority(EXTI0_1_IRQn, 2, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_1_IRQn);
+}
+
+/**
+  * @brief EXTI line detection callbacks
+  * @param GPIO_Pin: Specifies the pins connected EXTI line
+  * @retval None
+  */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  if (GPIO_Pin == GPIO_PIN_0)
+  {
+    /* Toggle LED3 */
+    BSP_LED_Toggle(LED3);
+		
+    SPI_Flag=1;
+	
+  }
+}
+
 
 /**
   * @brief  System Clock Configuration
@@ -283,12 +406,37 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
   /* Turn LED3 on: Transfer in transmission/reception process is correct */
   BSP_LED_On(LED3);
 	
-		  if(HAL_UART_Transmit(&UartHandle, (uint8_t*)aRxBuffer, BUFFERSIZE, 5000)!= HAL_OK)
+		  if(HAL_UART_Transmit(&UartHandle, (uint8_t*)aRxBuffer, BUFFERSIZE, 1000)!= HAL_OK)
   {
     Error_Handler();   
   }
 	
+	  if(HAL_UART_Transmit(&UartHandle, (uint8_t*)otherbuffer2, strlen(otherbuffer2), 5000)!= HAL_OK)
+  {
+    Error_Handler();   
+  }
+	
+
+	
 }
+
+/**
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
+  */
+static void Timeout_Error_Handler(void)
+{
+  /* Toggle LED4 on */
+  while(1)
+  {
+    BSP_LED_On(LED4);
+    HAL_Delay(500);
+    BSP_LED_Off(LED4);
+    HAL_Delay(500);
+  }
+}
+
 
 /**
   * @brief  SPI error callbacks.
