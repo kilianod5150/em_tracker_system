@@ -94,7 +94,7 @@ int main(void)
   HAL_Init();
 
   /* Configure LED4 */
-  BSP_LED_Init(LED4);
+  //BSP_LED_Init(LED4);
 
   /* Configure the system clock to 48 MHz */
   SystemClock_Config();
@@ -174,21 +174,21 @@ int main(void)
   sPWMConfig.OCNIdleState = TIM_OCNIDLESTATE_RESET;  
   sPWMConfig.OCFastMode   = TIM_OCFAST_DISABLE;  
 
-  /* Set the pulse value for channel 1 */
-  sPWMConfig.Pulse = PULSE1_VALUE;  
-  if(HAL_TIM_PWM_ConfigChannel(&TimHandle, &sPWMConfig, TIM_CHANNEL_1) != HAL_OK)
-  {
-    /* Configuration Error */
-    Error_Handler();
-  }
-  
-  /* Set the pulse value for channel 2 */
-  sPWMConfig.Pulse = PULSE2_VALUE;
-  if(HAL_TIM_PWM_ConfigChannel(&TimHandle, &sPWMConfig, TIM_CHANNEL_2) != HAL_OK)
-  {
-    /* Configuration Error */
-    Error_Handler();
-  }
+//  /* Set the pulse value for channel 1 */
+//  sPWMConfig.Pulse = PULSE1_VALUE;  
+//  if(HAL_TIM_PWM_ConfigChannel(&TimHandle, &sPWMConfig, TIM_CHANNEL_1) != HAL_OK)
+//  {
+//    /* Configuration Error */
+//    Error_Handler();
+//  }
+//  
+//  /* Set the pulse value for channel 2 */
+//  sPWMConfig.Pulse = PULSE2_VALUE;
+//  if(HAL_TIM_PWM_ConfigChannel(&TimHandle, &sPWMConfig, TIM_CHANNEL_2) != HAL_OK)
+//  {
+//    /* Configuration Error */
+//    Error_Handler();
+//  }
   
   /* Set the pulse value for channel 3 */
   sPWMConfig.Pulse = PULSE3_VALUE;
@@ -215,30 +215,30 @@ int main(void)
 
   /*##-3- Start PWM signals generation #######################################*/ 
   /* Start channel 1 */
-  if(HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_1) != HAL_OK)
-  {
-    /* Starting Error */
-    Error_Handler();
-  }
-  /* Start channel 1N */
-  if(HAL_TIMEx_PWMN_Start(&TimHandle, TIM_CHANNEL_1) != HAL_OK)
-  {
-    /* Starting Error */
-    Error_Handler();
-  }
-  
-  /* Start channel 2 */
-  if(HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_2) != HAL_OK)
-  {
-    /* Starting Error */
-    Error_Handler();
-  }
-  /* Start channel 2N */
-  if(HAL_TIMEx_PWMN_Start(&TimHandle, TIM_CHANNEL_2) != HAL_OK)
-  {
-    /* Starting Error */
-    Error_Handler();
-  }
+//  if(HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_1) != HAL_OK)
+//  {
+//    /* Starting Error */
+//    Error_Handler();
+//  }
+//  /* Start channel 1N */
+//  if(HAL_TIMEx_PWMN_Start(&TimHandle, TIM_CHANNEL_1) != HAL_OK)
+//  {
+//    /* Starting Error */
+//    Error_Handler();
+//  }
+//  
+//  /* Start channel 2 */
+//  if(HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_2) != HAL_OK)
+//  {
+//    /* Starting Error */
+//    Error_Handler();
+//  }
+//  /* Start channel 2N */
+//  if(HAL_TIMEx_PWMN_Start(&TimHandle, TIM_CHANNEL_2) != HAL_OK)
+//  {
+//    /* Starting Error */
+//    Error_Handler();
+//  }
   
   /* Start channel 3 */
   if(HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_3) != HAL_OK)
@@ -309,7 +309,7 @@ static void SystemClock_Config(void)
 static void Error_Handler(void)
 {
   /* Turn LED4 on */
-  BSP_LED_On(LED4);
+  //BSP_LED_On(LED4);
   while (1)
   {
   }

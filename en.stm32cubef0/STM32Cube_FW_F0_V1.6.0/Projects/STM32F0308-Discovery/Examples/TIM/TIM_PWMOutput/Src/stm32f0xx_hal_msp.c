@@ -85,17 +85,17 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef *htim)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
 
-  GPIO_InitStruct.Alternate = TIMx_GPIO_AF_CHANNEL1;
-  GPIO_InitStruct.Pin = TIMx_GPIO_PIN_CHANNEL1;
-  HAL_GPIO_Init(TIMx_GPIO_PORT_CHANNEL1, &GPIO_InitStruct);
+//  GPIO_InitStruct.Alternate = TIMx_GPIO_AF_CHANNEL1;
+//  GPIO_InitStruct.Pin = TIMx_GPIO_PIN_CHANNEL1;
+//  HAL_GPIO_Init(TIMx_GPIO_PORT_CHANNEL1, &GPIO_InitStruct);
 
-  GPIO_InitStruct.Alternate = TIMx_GPIO_AF_CHANNEL2;
-  GPIO_InitStruct.Pin = TIMx_GPIO_PIN_CHANNEL2;
-  HAL_GPIO_Init(TIMx_GPIO_PORT_CHANNEL2, &GPIO_InitStruct);
+//  GPIO_InitStruct.Alternate = TIMx_GPIO_AF_CHANNEL2;
+//  GPIO_InitStruct.Pin = TIMx_GPIO_PIN_CHANNEL2;
+//  HAL_GPIO_Init(TIMx_GPIO_PORT_CHANNEL2, &GPIO_InitStruct);
 
-  GPIO_InitStruct.Alternate = TIMx_GPIO_AF_CHANNEL3;
-  GPIO_InitStruct.Pin = TIMx_GPIO_PIN_CHANNEL3;
-  HAL_GPIO_Init(TIMx_GPIO_PORT_CHANNEL3, &GPIO_InitStruct);
+//  GPIO_InitStruct.Alternate = TIMx_GPIO_AF_CHANNEL3;
+//  GPIO_InitStruct.Pin = TIMx_GPIO_PIN_CHANNEL3;
+//  HAL_GPIO_Init(TIMx_GPIO_PORT_CHANNEL3, &GPIO_InitStruct);
 
   GPIO_InitStruct.Alternate = TIMx_GPIO_AF_CHANNEL4;
   GPIO_InitStruct.Pin = TIMx_GPIO_PIN_CHANNEL4;

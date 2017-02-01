@@ -91,7 +91,7 @@ int main(void)
   HAL_Init();
 
   /* Configure LED4 */
-  BSP_LED_Init(LED4);
+//  BSP_LED_Init(LED4);
 
   /* Configure the system clock to 48 MHz */
   SystemClock_Config();
@@ -161,29 +161,29 @@ int main(void)
   sConfig.OCIdleState  = TIM_OCIDLESTATE_RESET;
   sConfig.OCNIdleState = TIM_OCNIDLESTATE_RESET;
 
-  /* Set the pulse value for channel 1 */
-  sConfig.Pulse = PULSE1_VALUE;
-  if (HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_1) != HAL_OK)
-  {
-    /* Configuration Error */
-    Error_Handler();
-  }
+//  /* Set the pulse value for channel 1 */
+//  sConfig.Pulse = PULSE1_VALUE;
+//  if (HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_1) != HAL_OK)
+//  {
+//    /* Configuration Error */
+//    Error_Handler();
+//  }
 
-  /* Set the pulse value for channel 2 */
-  sConfig.Pulse = PULSE2_VALUE;
-  if (HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_2) != HAL_OK)
-  {
-    /* Configuration Error */
-    Error_Handler();
-  }
+//  /* Set the pulse value for channel 2 */
+//  sConfig.Pulse = PULSE2_VALUE;
+//  if (HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_2) != HAL_OK)
+//  {
+//    /* Configuration Error */
+//    Error_Handler();
+//  }
 
-  /* Set the pulse value for channel 3 */
-  sConfig.Pulse = PULSE3_VALUE;
-  if (HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_3) != HAL_OK)
-  {
-    /* Configuration Error */
-    Error_Handler();
-  }
+//  /* Set the pulse value for channel 3 */
+//  sConfig.Pulse = PULSE3_VALUE;
+//  if (HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_3) != HAL_OK)
+//  {
+//    /* Configuration Error */
+//    Error_Handler();
+//  }
 
   /* Set the pulse value for channel 4 */
   sConfig.Pulse = PULSE4_VALUE;
@@ -193,25 +193,25 @@ int main(void)
     Error_Handler();
   }
 
-  /*##-3- Start PWM signals generation #######################################*/
-  /* Start channel 1 */
-  if (HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_1) != HAL_OK)
-  {
-    /* PWM Generation Error */
-    Error_Handler();
-  }
-  /* Start channel 2 */
-  if (HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_2) != HAL_OK)
-  {
-    /* PWM Generation Error */
-    Error_Handler();
-  }
-  /* Start channel 3 */
-  if (HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_3) != HAL_OK)
-  {
-    /* PWM generation Error */
-    Error_Handler();
-  }
+//  /*##-3- Start PWM signals generation #######################################*/
+//  /* Start channel 1 */
+//  if (HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_1) != HAL_OK)
+//  {
+//    /* PWM Generation Error */
+//    Error_Handler();
+//  }
+//  /* Start channel 2 */
+//  if (HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_2) != HAL_OK)
+//  {
+//    /* PWM Generation Error */
+//    Error_Handler();
+//  }
+//  /* Start channel 3 */
+//  if (HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_3) != HAL_OK)
+//  {
+//    /* PWM generation Error */
+//    Error_Handler();
+//  }
   /* Start channel 4 */
   if (HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_4) != HAL_OK)
   {
@@ -233,7 +233,7 @@ int main(void)
 static void Error_Handler(void)
 {
   /* Turn LED4 on */
-  BSP_LED_On(LED4);
+ // BSP_LED_On(LED4);
   while (1)
   {
   }
@@ -254,32 +254,40 @@ static void Error_Handler(void)
   * @param  None
   * @retval None
   */
-static void SystemClock_Config(void)
+void SystemClock_Config(void)
 {
-  RCC_ClkInitTypeDef RCC_ClkInitStruct;
+
   RCC_OscInitTypeDef RCC_OscInitStruct;
-  
-  /* Select HSE Oscillator as PLL source */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_ClkInitTypeDef RCC_ClkInitStruct;
+
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = 16;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL12;
   RCC_OscInitStruct.PLL.PREDIV = RCC_PREDIV_DIV1;
-  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL6;
-  if (HAL_RCC_OscConfig(&RCC_OscInitStruct)!= HAL_OK)
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
   }
 
-  /* Select PLL as system clock source and configure the HCLK and PCLK1 clocks dividers */
-  RCC_ClkInitStruct.ClockType = (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1);
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1)!= HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
   {
     Error_Handler();
   }
+
+  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
+
+  HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
+
+  /* SysTick_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
 
 #ifdef  USE_FULL_ASSERT
