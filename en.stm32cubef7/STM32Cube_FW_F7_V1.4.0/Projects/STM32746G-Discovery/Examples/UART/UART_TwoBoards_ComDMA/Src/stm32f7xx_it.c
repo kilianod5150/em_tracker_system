@@ -55,9 +55,9 @@
 /* Private variables ---------------------------------------------------------*/
 /* UART handler declared in "main.c" file */
 extern UART_HandleTypeDef UartHandle;
-
-
-
+extern TIM_HandleTypeDef    TimHandle;
+extern TIM_HandleTypeDef    ADA_TimHandle;
+extern TIM_HandleTypeDef    UART_TimHandle;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -207,13 +207,34 @@ void USARTx_IRQHandler(void)
 }
 
 /**
-  * @brief  This function handles external lines 15 to 10 interrupt request.
+  * @brief  This function handles TIM interrupt request.
   * @param  None
   * @retval None
   */
-void EXTI15_10_IRQHandler(void)
+void TIMx_IRQHandler(void)
 {
-  HAL_GPIO_EXTI_IRQHandler(KEY_BUTTON_PIN);
+  HAL_TIM_IRQHandler(&TimHandle);
+}
+
+/**
+  * @brief  This function handles TIM interrupt request.
+  * @param  None
+  * @retval None
+  */
+void ADA_TIMx_IRQHandler(void)
+{
+  HAL_TIM_IRQHandler(&ADA_TimHandle);
+}
+
+
+/**
+  * @brief  This function handles TIM interrupt request.
+  * @param  None
+  * @retval None
+  */
+void UART_TIMx_IRQHandler(void)
+{
+  HAL_TIM_IRQHandler(&UART_TimHandle);
 }
 
 /**

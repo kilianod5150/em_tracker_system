@@ -27,5 +27,7 @@ stm32746g_discovery\stm32f7xx_hal_pwr_ex.o: ../../../../../../Drivers/STM32F7xx_
 stm32746g_discovery\stm32f7xx_hal_pwr_ex.o: ../../../../../../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_i2c_ex.h
 stm32746g_discovery\stm32f7xx_hal_pwr_ex.o: ../../../../../../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_pwr.h
 stm32746g_discovery\stm32f7xx_hal_pwr_ex.o: ../../../../../../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_pwr_ex.h
+stm32746g_discovery\stm32f7xx_hal_pwr_ex.o: ../../../../../../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_tim.h
+stm32746g_discovery\stm32f7xx_hal_pwr_ex.o: ../../../../../../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_tim_ex.h
 stm32746g_discovery\stm32f7xx_hal_pwr_ex.o: ../../../../../../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_uart.h
 stm32746g_discovery\stm32f7xx_hal_pwr_ex.o: ../../../../../../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_uart_ex.h

@@ -91,6 +91,29 @@
 #define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
 /* Exported functions ------------------------------------------------------- */
 
+/* Exported types ------------------------------------------------------------*/
+/* Exported constants --------------------------------------------------------*/
+/* Exported macro ------------------------------------------------------------*/
+/* User can use this section to tailor TIMx instance used and associated
+   resources */
+/* Definition for TIMx clock resources */
+#define TIMx                           TIM3
+#define TIMx_CLK_ENABLE()              __HAL_RCC_TIM3_CLK_ENABLE()
+#define ADA_TIMx                       TIM4
+#define ADA_TIMx_CLK_ENABLE()          __HAL_RCC_TIM4_CLK_ENABLE()
+
+#define UART_TIMx                       TIM2
+#define UART_TIMx_CLK_ENABLE()          __HAL_RCC_TIM2_CLK_ENABLE()
+
+/* Definition for TIMx's NVIC */
+#define TIMx_IRQn                      TIM3_IRQn
+#define TIMx_IRQHandler                TIM3_IRQHandler
+
+#define ADA_TIMx_IRQn                  TIM4_IRQn
+#define ADA_TIMx_IRQHandler            TIM4_IRQHandler
+
+#define UART_TIMx_IRQn                 TIM2_IRQn
+#define UART_TIMx_IRQHandler           TIM2_IRQHandler
 #endif /* __MAIN_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

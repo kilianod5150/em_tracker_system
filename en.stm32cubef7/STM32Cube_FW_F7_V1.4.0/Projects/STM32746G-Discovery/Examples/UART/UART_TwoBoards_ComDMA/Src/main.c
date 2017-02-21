@@ -10,13 +10,13 @@
 //#include <stm32f7xx_hal_tim.c>
 #include "stm32f7xx_hal_tim_ex.h"
 
-#define TIMx                           TIM3
-#define TIMx_CLK_ENABLE()              __HAL_RCC_TIM3_CLK_ENABLE()
+//#define TIMx                           TIM3
+//#define TIMx_CLK_ENABLE()              __HAL_RCC_TIM3_CLK_ENABLE()
 
 
 /* Definition for TIMx's NVIC */
-#define TIMx_IRQn                      TIM3_IRQn
-#define TIMx_IRQHandler                TIM3_IRQHandler
+//#define TIMx_IRQn                      TIM3_IRQn
+//#define TIMx_IRQHandler                TIM3_IRQHandler
 
 
 
@@ -41,16 +41,15 @@ __IO uint32_t UserButtonStatus = 0;  /* set to 1 after User Button interrupt  */
 
 
 TIM_HandleTypeDef    TimHandle;
-
-
+TIM_HandleTypeDef    ADA_TimHandle; // TIM handle for ADA SPI acquisition
+TIM_HandleTypeDef    UART_TimHandle; // TIM handle for UART acquisition
 
 /* Prescaler declaration */
 uint32_t uwPrescalerValue = 0;
 
 /* Buffer used for transmission */
-uint8_t aTxBuffer[] = " ****UART_TwoBoards communication based on DMA****  ****UART_TwoBoards communication based on DMA****  ****UART_TwoBoards communication based on DMA***\n";
-uint8_t aTxBuffer2[] = " Hello World \n";
-uint8_t aTxBuffer3[256];
+uint8_t aTxBuffer[] = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz\n";
+
 /* Buffer used for reception */
 uint8_t aRxBuffer[RXBUFFERSIZE];
 
@@ -97,12 +96,13 @@ int main(void)
   /* Configure LED1 */
   BSP_LED_Init(LED1);
 	
-	  /* Compute the prescaler value to have TIMx counter clock equal to 10000 Hz */
-  uwPrescalerValue = (uint32_t)((SystemCoreClock / 2) / 10000) - 1;
+	  /* Compute the prescaler value to have TIMx counter clock equal to 100000 Hz */
+  uwPrescalerValue = (uint32_t)((SystemCoreClock / 2) / 100000) - 1;
 
   /* Set TIMx instance */
   TimHandle.Instance = TIMx;
-
+  ADA_TimHandle.Instance = ADA_TIMx; 
+	UART_TimHandle.Instance = UART_TIMx; 
   /* Initialize TIMx peripheral as follows:
        + Period = 10000 - 1
        + Prescaler = ((SystemCoreClock / 2)/10000) - 1
@@ -114,21 +114,62 @@ int main(void)
   TimHandle.Init.ClockDivision     = 0;
   TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;
   TimHandle.Init.RepetitionCounter = 0;
+	
+	ADA_TimHandle.Init.Period            = 100000 - 1;
+  ADA_TimHandle.Init.Prescaler         = uwPrescalerValue;
+  ADA_TimHandle.Init.ClockDivision     = 0;
+  ADA_TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;
+  ADA_TimHandle.Init.RepetitionCounter = 0;
+	
+	UART_TimHandle.Init.Period            = 100000 - 1;
+  UART_TimHandle.Init.Prescaler         = uwPrescalerValue;
+  UART_TimHandle.Init.ClockDivision     = 0;
+  UART_TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;
+  UART_TimHandle.Init.RepetitionCounter = 0;
 
-//  if (HAL_TIM_Base_Init(&TimHandle) != HAL_OK)
-//  {
-//    /* Initialization Error */
-//    Error_Handler();
-//  }
+  if (HAL_TIM_Base_Init(&TimHandle) != HAL_OK)
+  {
+    /* Initialization Error */
+    Error_Handler();
+  }
+	
+	  if (HAL_TIM_Base_Init(&ADA_TimHandle) != HAL_OK)
+  {
+    /* Initialization Error */
+    Error_Handler();
+  }
+	
+		if (HAL_TIM_Base_Init(&UART_TimHandle) != HAL_OK)
+  {
+    /* Initialization Error */
+    Error_Handler();
+  }
 
   /*##-2- Start the TIM Base generation in interrupt mode ####################*/
   /* Start Channel1 */
-//  if (HAL_TIM_Base_Start_IT(&TimHandle) != HAL_OK)
-//  {
-//    /* Starting Error */
-//    Error_Handler();
-//  }
+  if (HAL_TIM_Base_Start_IT(&TimHandle) != HAL_OK)
+  {
+    /* Starting Error */
+    Error_Handler();
+  }
 
+	  /*##-2- Start the TIM Base generation in interrupt mode ####################*/
+  /* Start Channel1 */
+  if (HAL_TIM_Base_Start_IT(&ADA_TimHandle) != HAL_OK)
+  {
+    /* Starting Error */
+    Error_Handler();
+  }
+	
+		  /*##-2- Start the TIM Base generation in interrupt mode ####################*/
+  /* Start Channel1 */
+  if (HAL_TIM_Base_Start_IT(&UART_TimHandle) != HAL_OK)
+  {
+    /* Starting Error */
+    Error_Handler();
+  }
+	
+	
   /*##-1- Configure the UART peripheral ######################################*/
   /* Put the USART peripheral in the Asynchronous mode (UART Mode) */
   /* UART configured as follows:
@@ -139,7 +180,7 @@ int main(void)
       - Hardware flow control disabled (RTS and CTS signals) */
   UartHandle.Instance        = USARTx;
 
-  UartHandle.Init.BaudRate   = 9600;
+  UartHandle.Init.BaudRate   = 230400;
   UartHandle.Init.WordLength = UART_WORDLENGTH_8B;
   UartHandle.Init.StopBits   = UART_STOPBITS_1;
   UartHandle.Init.Parity     = UART_PARITY_NONE;
@@ -154,59 +195,11 @@ int main(void)
     Error_Handler();
   }
   
-//SystemInit();
-	
-	
-
-	
-	
-	
-	
-
-  /* Configure User push-button in Interrupt mode */
-  BSP_PB_Init(BUTTON_KEY, BUTTON_MODE_EXTI);
-  
-  /* Wait for User push-button press before starting the Communication.
-     In the meantime, LED1 is blinking */
-  while(UserButtonStatus == 0)
-  {
-      /* Toggle LED1*/
-      BSP_LED_Toggle(LED1); 
-      HAL_Delay(100);
-		
-  }
-  
-  BSP_LED_Off(LED1); 
 
 
-//  BSP_LED_On(LED1); 
 //  /* Infinite loop */
   while (1)
   {
-		//  BSP_LED_Toggle(LED1); 
-		 // BSP_LED_Toggle(LED2);
-      HAL_Delay(1000);
-	int	len=strlen(aTxBuffer2);
-	  	HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer2, len);
-		
-		system_time=HAL_GetTick();
-		sprintf(aTxBuffer3,"Time = %d \n",system_time);
-		HAL_Delay(500);
-		HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer3, strlen(aTxBuffer3));
-		float x=0;
-		for(int i=0; i<216000000; i++)
-		{
-			x=i*i;
-		}
-		system_time=HAL_GetTick();
-		sprintf(aTxBuffer3,"Time = %d \n",system_time);
-		//HAL_Delay(500);
-		HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer3, strlen(aTxBuffer3));
-		
-		
-		
-		//itoa(system_time, aTxBuffer2, 10);
-	//	for (int i = 0; i < 500000; i++);
 
   }
 }
@@ -236,7 +229,29 @@ int main(void)
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-  BSP_LED_Toggle(LED1);
+	
+	
+	    if (htim->Instance==TIM3) //check if this assosiated with TIM3
+		 //if (htim->Init.Period==9999)	 // can check if this timer has a certain period
+      {
+			//	BSP_LED_Toggle(LED1); 
+			//	HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer, strlen(aTxBuffer));
+			}
+			
+			if (htim->Instance==TIM4) //check if this assosiated with TIM3
+		 //if (htim->Init.Period==9999)	 // can check if this timer has a certain period
+      {
+			//	BSP_LED_Toggle(LED1); 
+			//	HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer, strlen(aTxBuffer));
+			}
+			
+			if (htim->Instance==TIM2) //check if this assosiated with TIM3
+		 //if (htim->Init.Period==9999)	 // can check if this timer has a certain period
+      {
+				BSP_LED_Toggle(LED1); 
+			//	HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer, strlen(aTxBuffer));
+			}
+			
 }
 
 
@@ -327,40 +342,8 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *UartHandle)
 }
 
 
-/**
-  * @brief EXTI line detection callbacks
-  * @param GPIO_Pin: Specifies the pins connected EXTI line
-  * @retval None
-  */
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
-  if(GPIO_Pin == KEY_BUTTON_PIN)
-  {  
-    UserButtonStatus = 1;
-  }
-}
 
-/**
-  * @brief  Compares two buffers.
-  * @param  pBuffer1, pBuffer2: buffers to be compared.
-  * @param  BufferLength: buffer's length
-  * @retval 0  : pBuffer1 identical to pBuffer2
-  *         >0 : pBuffer1 differs from pBuffer2
-  */
-static uint16_t Buffercmp(uint8_t* pBuffer1, uint8_t* pBuffer2, uint16_t BufferLength)
-{
-  while (BufferLength--)
-  {
-    if ((*pBuffer1) != *pBuffer2)
-    {
-      return BufferLength;
-    }
-    pBuffer1++;
-    pBuffer2++;
-  }
 
-  return 0;
-}
 
 /**
   * @brief  This function is executed in case of error occurrence.
@@ -370,11 +353,11 @@ static uint16_t Buffercmp(uint8_t* pBuffer1, uint8_t* pBuffer2, uint16_t BufferL
 static void Error_Handler(void)
 {
   /* Turn LED1 on */
-  BSP_LED_On(LED1);
+  //BSP_LED_On(LED1);
   while(1)
   {
     /* Error if LED1 is slowly blinking (1 sec. period) */
-    BSP_LED_Toggle(LED1); 
+ //   BSP_LED_Toggle(LED1); 
     HAL_Delay(1000); 
   }  
 }
