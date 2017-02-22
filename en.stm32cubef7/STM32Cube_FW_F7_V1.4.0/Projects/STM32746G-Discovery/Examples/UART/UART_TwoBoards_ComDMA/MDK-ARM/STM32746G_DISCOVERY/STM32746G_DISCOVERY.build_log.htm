@@ -22,20 +22,20 @@ Dialog DLL:      TCM.DLL V1.14.9.0
  
 <h2>Project:</h2>
 E:\em_tracker_system\en.stm32cubef7\STM32Cube_FW_F7_V1.4.0\Projects\STM32746G-Discovery\Examples\UART\UART_TwoBoards_ComDMA\MDK-ARM\Project.uvprojx
-Project File Date:  09/08/2016
+Project File Date:  02/21/2017
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 2 (build 183)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'STM32746G_DISCOVERY'
-compiling stm32f7xx_it.c...
-compiling stm32f7xx_hal_msp.c...
 compiling main.c...
-../Src/main.c(59): warning:  #177-D: function "Buffercmp" was declared but never referenced
+../Src/main.c(309): warning:  #223-D: function "strlen" declared implicitly
+  				HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer, strlen(aTxBuffer));
+../Src/main.c(60): warning:  #177-D: function "Buffercmp" was declared but never referenced
   static uint16_t Buffercmp(uint8_t* pBuffer1, uint8_t* pBuffer2, uint16_t BufferLength);
-../Src/main.c: 1 warning, 0 errors
+../Src/main.c: 2 warnings, 0 errors
 linking...
-Program Size: Code=7592 RO-data=544 RW-data=16 ZI-data=1512  
-"STM32746G_DISCOVERY\STM32746G_DISCOVERY.axf" - 0 Error(s), 1 Warning(s).
+Program Size: Code=10016 RO-data=544 RW-data=152 ZI-data=1936  
+"STM32746G_DISCOVERY\STM32746G_DISCOVERY.axf" - 0 Error(s), 2 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -53,7 +53,7 @@ Package Vendor: ARM
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.0.0
-Build Time Elapsed:  00:00:07
+Build Time Elapsed:  00:00:04
 </pre>
 </body>
 </html>

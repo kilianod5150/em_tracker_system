@@ -58,6 +58,7 @@ extern UART_HandleTypeDef UartHandle;
 extern TIM_HandleTypeDef    TimHandle;
 extern TIM_HandleTypeDef    ADA_TimHandle;
 extern TIM_HandleTypeDef    UART_TimHandle;
+extern SPI_HandleTypeDef SpiHandle;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -242,6 +243,44 @@ void UART_TIMx_IRQHandler(void)
   * @param  None
   * @retval None
   */
+
+
+
+/**
+  * @brief  This function handles DMA Rx interrupt request.
+  * @param  None
+  * @retval None
+  */
+void SPIx_DMA_RX_IRQHandler(void)
+{
+  HAL_DMA_IRQHandler(SpiHandle.hdmarx);
+}
+
+/**
+  * @brief  This function handles SPI interrupt request.
+  * @param  None
+  * @retval None
+  */
+void SPIx_IRQHandler(void)
+{
+  HAL_SPI_IRQHandler(&SpiHandle);
+}
+
+/**
+  * @brief  This function handles DMA Tx interrupt request.
+  * @param  None
+  * @retval None
+  */
+void SPIx_DMA_TX_IRQHandler(void)
+{
+  HAL_DMA_IRQHandler(SpiHandle.hdmatx);
+}
+/**
+  * @brief  This function handles PPP interrupt request.
+  * @param  None
+  * @retval None
+
+
 /*void PPP_IRQHandler(void)
 {
 }*/
