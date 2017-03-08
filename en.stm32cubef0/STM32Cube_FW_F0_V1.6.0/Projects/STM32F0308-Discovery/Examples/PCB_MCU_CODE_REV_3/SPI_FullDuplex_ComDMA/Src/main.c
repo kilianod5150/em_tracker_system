@@ -155,6 +155,23 @@ int main(void)
   /* Configure the system clock to 48 MHz */
   SystemClock_Config();
 	
+	  __HAL_RCC_GPIOA_CLK_ENABLE(); 
+		GPIO_InitTypeDef  gpio_init_structure_new; // define an object for the GPIO
+
+	  gpio_init_structure_new.Pin = GPIO_PIN_3 ;
+		gpio_init_structure_new.Mode = GPIO_MODE_OUTPUT_PP;
+    gpio_init_structure_new.Pull = GPIO_NOPULL;
+    gpio_init_structure_new.Speed = GPIO_SPEED_HIGH;
+  
+    HAL_GPIO_Init(GPIOA, &gpio_init_structure_new); // initialise this GPIO
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_SET);  // set high
+	  HAL_Delay(1000); // seemingly we need this...?
+  //  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1|GPIO_PIN_3, GPIO_PIN_RESET);  // set low
+	//	HAL_Delay(1000);
+	
+	
+	
+	
 	  /* -2- Configure EXTI_Line0 (connected to PA.00 pin) in interrupt mode */
   EXTI0_1_IRQHandler_Config();
 
@@ -168,17 +185,20 @@ int main(void)
   ADC_Init();
 	
 	//Start Up main sample rate clock
-	TIM_Init();
+	//TIM_Init();
 	
 	//Start up PWM output for coil driver
 	TIM_PWM_Init();
 	
 	//Run any calculations required for the demodulator, generating sine tables for example
-	Demodulator_Init();
+	//Demodulator_Init(); //something in here causing issues
 	
 	
 	
 	
+
+
+
 
 
 
@@ -187,8 +207,11 @@ int main(void)
 	// put low priority timing stuff in here
   while (1)
   {
-				
-		SPI_Handler_Function(); // function that handles slave SPI stuff
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_SET);  // set high
+		HAL_Delay(1000);
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_RESET);  // set high
+		HAL_Delay(1000);
+	//	SPI_Handler_Function(); // function that handles slave SPI stuff
 	}
 	
 	
@@ -678,7 +701,7 @@ static void EXTI0_1_IRQHandler_Config(void)
   /* Configure PA.00 pin as input floating */
   GPIO_InitStructure.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStructure.Pull = GPIO_NOPULL;
-  GPIO_InitStructure.Pin = GPIO_PIN_0;
+  GPIO_InitStructure.Pin = GPIO_PIN_4;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
 
   /* Enable and set EXTI line 0 Interrupt to the lowest priority */
@@ -693,7 +716,7 @@ static void EXTI0_1_IRQHandler_Config(void)
   */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-  if (GPIO_Pin == GPIO_PIN_0)
+  if (GPIO_Pin == GPIO_PIN_4)
   {
     /* Toggle LED3 */
     //BSP_LED_Toggle(LED3);

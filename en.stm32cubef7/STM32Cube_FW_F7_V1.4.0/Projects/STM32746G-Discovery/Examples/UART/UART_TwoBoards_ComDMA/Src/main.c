@@ -51,6 +51,8 @@ uint32_t uwPrescalerValue = 0;
 uint8_t aTxBuffer[] = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz\n";
 uint8_t SPI_TxBuffer[] = "hello";
 uint8_t SPI_RxBuffer[SPI_BUFFERSIZE];
+//uint8_t SPI_RxBuffer[] = "hello";
+
 /* Buffer used for reception */
 uint8_t aRxBuffer[RXBUFFERSIZE];
 
@@ -267,6 +269,7 @@ int main(void)
 		// if the HAL SPI is finished, pull the spi enable pin low, could change this to simply toggle
 		if(HAL_SPI_GetState(&SpiHandle) == HAL_SPI_STATE_READY)
 		{
+			 HAL_Delay(100);
 			 HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);  // set low
 
 		}
@@ -306,7 +309,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	    if (htim->Instance==TIM3) //check if this assosiated with TIM3
       {
 			//	BSP_LED_Toggle(LED1); 
-				HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer, strlen(aTxBuffer));
+			//	HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer, strlen(aTxBuffer));
+				  HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)SPI_RxBuffer, strlen(SPI_RxBuffer)); //send what is recieved from the SPI
 			}
 			
 			if (htim->Instance==TIM4) //check if this assosiated with TIM3
@@ -318,7 +322,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		{
 		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_SET);  // set high
 		
-	  if(HAL_SPI_TransmitReceive_DMA(&SpiHandle, (uint8_t*)aTxBuffer, (uint8_t *)aRxBuffer, SPI_BUFFERSIZE) != HAL_OK)
+	  if(HAL_SPI_TransmitReceive_DMA(&SpiHandle, (uint8_t*)SPI_TxBuffer, (uint8_t *)SPI_RxBuffer, SPI_BUFFERSIZE) != HAL_OK)
   {
     /* Transfer error in transmission process */
     Error_Handler();
