@@ -211,7 +211,7 @@ int main(void)
 		HAL_Delay(1000);
 		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_RESET);  // set high
 		HAL_Delay(1000);
-	//	SPI_Handler_Function(); // function that handles slave SPI stuff
+		SPI_Handler_Function(); // function that handles slave SPI stuff
 	}
 	
 	
@@ -246,7 +246,7 @@ static void SPI_Init(void)
 
   /* Slave board must wait until Master Board is ready. This to guarantee the 
      correctness of transmitted/received data */
-  HAL_Delay(5);  
+ // HAL_Delay(5);  
 
   if (HAL_SPI_Init(&SpiHandle) != HAL_OK)
   {

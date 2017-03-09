@@ -51,6 +51,7 @@ uint32_t uwPrescalerValue = 0;
 uint8_t aTxBuffer[] = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz\n";
 uint8_t SPI_TxBuffer[] = "hello";
 uint8_t SPI_RxBuffer[SPI_BUFFERSIZE];
+uint8_t SPI_STMF0_FLAG=0; // flag for handling SPI comms to the STM32F0, flag is 0 when free, and 1 when it is active
 //uint8_t SPI_RxBuffer[] = "hello";
 
 /* Buffer used for reception */
@@ -267,11 +268,11 @@ int main(void)
 
 		
 		// if the HAL SPI is finished, pull the spi enable pin low, could change this to simply toggle
-		if(HAL_SPI_GetState(&SpiHandle) == HAL_SPI_STATE_READY)
+		if( (HAL_SPI_GetState(&SpiHandle) == HAL_SPI_STATE_READY) && (SPI_STMF0_FLAG==1) )
 		{
-			 HAL_Delay(100);
+		//	 HAL_Delay(100);
 			 HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);  // set low
-
+       SPI_STMF0_FLAG=0;
 		}
 		
 		
@@ -317,9 +318,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       {
 				
 				//need to check which timer to use
-				
+			//	HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer, strlen(aTxBuffer));
 						if(HAL_SPI_GetState(&SpiHandle) == HAL_SPI_STATE_READY)
 		{
+			BSP_LED_Toggle(LED1); 
 		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_SET);  // set high
 		
 	  if(HAL_SPI_TransmitReceive_DMA(&SpiHandle, (uint8_t*)SPI_TxBuffer, (uint8_t *)SPI_RxBuffer, SPI_BUFFERSIZE) != HAL_OK)
@@ -328,6 +330,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     Error_Handler();
   }	
 	
+	
+	SPI_STMF0_FLAG=1;
 	
 //		while (HAL_SPI_GetState(&SpiHandle) != HAL_SPI_STATE_READY)
 // {
@@ -343,7 +347,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			
 			if (htim->Instance==TIM2) //check if this assosiated with TIM3
       {
-				BSP_LED_Toggle(LED1); 
+			//	BSP_LED_Toggle(LED1); 
 			//	HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer, strlen(aTxBuffer));
 			}
 			
