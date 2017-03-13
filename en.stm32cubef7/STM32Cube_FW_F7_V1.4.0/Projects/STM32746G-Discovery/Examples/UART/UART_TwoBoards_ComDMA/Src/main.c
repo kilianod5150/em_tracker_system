@@ -6,17 +6,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "stm32f7xx_hal_tim.h"
-//
-//#include <stm32f7xx_hal_tim.c>
 #include "stm32f7xx_hal_tim_ex.h"
 
-//#define TIMx                           TIM3
-//#define TIMx_CLK_ENABLE()              __HAL_RCC_TIM3_CLK_ENABLE()
 
-
-/* Definition for TIMx's NVIC */
-//#define TIMx_IRQn                      TIM3_IRQn
-//#define TIMx_IRQHandler                TIM3_IRQHandler
 
 
 
@@ -63,7 +55,13 @@ static void Error_Handler(void);
 static uint16_t Buffercmp(uint8_t* pBuffer1, uint8_t* pBuffer2, uint16_t BufferLength);
 static void MPU_Config(void);
 static void CPU_CACHE_Enable(void);
-
+static void UART_Init(void);
+static void UART_Timer_Init(void);
+static void SPI_Init(void);
+static void GPIO_Init(void);
+static void ADC_Init(void);
+static void TIM_Init(void);
+uint8_t LED_Test_Flag=0; 
 /* Private define ------------------------------------------------------------*/
 enum {
 	TRANSFER_WAIT,
@@ -114,75 +112,12 @@ int main(void)
   /* Configure LED1 */
   BSP_LED_Init(LED1);
 	
-	  /*##-1- Configure the UART peripheral ######################################*/
-  /* Put the USART peripheral in the Asynchronous mode (UART Mode) */
-  /* UART configured as follows:
-      - Word Length = 8 Bits
-      - Stop Bit = One Stop bit
-      - Parity = None
-      - BaudRate = 9600 baud
-      - Hardware flow control disabled (RTS and CTS signals) */
-  UartHandle.Instance        = USARTx;
 
-  UartHandle.Init.BaudRate   = 230400;
-  UartHandle.Init.WordLength = UART_WORDLENGTH_8B;
-  UartHandle.Init.StopBits   = UART_STOPBITS_1;
-  UartHandle.Init.Parity     = UART_PARITY_NONE;
-  UartHandle.Init.HwFlowCtl  = UART_HWCONTROL_NONE;
-  UartHandle.Init.Mode       = UART_MODE_TX_RX;
-  if(HAL_UART_DeInit(&UartHandle) != HAL_OK)
-  {
-    Error_Handler();
-  }  
-  if(HAL_UART_Init(&UartHandle) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  
-
-	
-	  /*##-1- Configure the SPI peripheral #######################################*/
-  /* Set the SPI parameters */
-  SpiHandle.Instance               = SPIx;
-  SpiHandle.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
-  SpiHandle.Init.Direction         = SPI_DIRECTION_2LINES;
-  SpiHandle.Init.CLKPhase          = SPI_PHASE_1EDGE;
-  SpiHandle.Init.CLKPolarity       = SPI_POLARITY_HIGH;
-  SpiHandle.Init.DataSize          = SPI_DATASIZE_8BIT;
-  SpiHandle.Init.FirstBit          = SPI_FIRSTBIT_MSB;
-  SpiHandle.Init.TIMode            = SPI_TIMODE_DISABLE;
-  SpiHandle.Init.CRCCalculation    = SPI_CRCCALCULATION_DISABLE;
-  SpiHandle.Init.CRCPolynomial     = 7;
-  SpiHandle.Init.NSS               = SPI_NSS_SOFT;
-  SpiHandle.Init.Mode = SPI_MODE_MASTER;
 
   HAL_Delay(5);  
 	
 	
-	    GPIO_InitTypeDef  gpio_init_structure_new; // define an object for the GPIO
-   	__HAL_RCC_GPIOI_CLK_ENABLE();  // D7 or PI3 is on port I so enable the GPIO update clock (although it isactually enabled already by the LEDs)
 
-	  gpio_init_structure_new.Pin = GPIO_PIN_0 | GPIO_PIN_3 ;
-		//gpio_init_structure.Pin = GPIO_PIN_0 ;
-    gpio_init_structure_new.Mode = GPIO_MODE_OUTPUT_PP;
-    gpio_init_structure_new.Pull = GPIO_NOPULL;
-    gpio_init_structure_new.Speed = GPIO_SPEED_HIGH;
-  
-    HAL_GPIO_Init(GPIOI, &gpio_init_structure_new); // initialise this GPIO
-    HAL_GPIO_WritePin(GPIOI, GPIO_PIN_3, GPIO_PIN_RESET);  // set low
-		HAL_GPIO_WritePin(GPIOI, GPIO_PIN_0, GPIO_PIN_SET);  // set CS pin high
-    HAL_Delay(1);  
-		
-		GPIO_InitTypeDef  gpio_init_structure_b; // define an object for the GPIO
-		__HAL_RCC_GPIOB_CLK_ENABLE();  // clock for port B gpios
-		gpio_init_structure_b.Pin = GPIO_PIN_8; 
-		gpio_init_structure_b.Mode = GPIO_MODE_OUTPUT_PP;
-    gpio_init_structure_b.Pull = GPIO_NOPULL;
-    gpio_init_structure_b.Speed = GPIO_SPEED_HIGH;
-		HAL_GPIO_Init(GPIOB, &gpio_init_structure_b); // initialise this GPIO
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);  // set low
-
-    HAL_Delay(100);
 
 
 	  /* Compute the prescaler value to have TIMx counter clock equal to 100000 Hz */
@@ -191,7 +126,7 @@ int main(void)
   /* Set TIMx instance */
   TimHandle.Instance = TIMx;
   ADA_TimHandle.Instance = ADA_TIMx; 
-	UART_TimHandle.Instance = UART_TIMx; 
+
   /* Initialize TIMx peripheral as follows:
        + Period = 10000 - 1
        + Prescaler = ((SystemCoreClock / 2)/10000) - 1
@@ -210,63 +145,58 @@ int main(void)
   ADA_TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;
   ADA_TimHandle.Init.RepetitionCounter = 0;
 	
-	UART_TimHandle.Init.Period            = 1000000 - 1;
-  UART_TimHandle.Init.Prescaler         = uwPrescalerValue;
-  UART_TimHandle.Init.ClockDivision     = 0;
-  UART_TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;
-  UART_TimHandle.Init.RepetitionCounter = 0;
+	
 
-  if (HAL_TIM_Base_Init(&TimHandle) != HAL_OK)
-  {
-    /* Initialization Error */
-    Error_Handler();
-  }
-	
-	  if (HAL_TIM_Base_Init(&ADA_TimHandle) != HAL_OK)
-  {
-    /* Initialization Error */
-    Error_Handler();
-  }
-	
-		if (HAL_TIM_Base_Init(&UART_TimHandle) != HAL_OK)
-  {
-    /* Initialization Error */
-    Error_Handler();
-  }
+		
 
-  /*##-2- Start the TIM Base generation in interrupt mode ####################*/
-  /* Start Channel1 */
-  if (HAL_TIM_Base_Start_IT(&TimHandle) != HAL_OK)
-  {
-    /* Starting Error */
-    Error_Handler();
-  }
+//  if (HAL_TIM_Base_Init(&TimHandle) != HAL_OK)
+//  {
+//    /* Initialization Error */
+//    Error_Handler();
+//  }
+//	
+//	  if (HAL_TIM_Base_Init(&ADA_TimHandle) != HAL_OK)
+//  {
+//    /* Initialization Error */
+//    Error_Handler();
+//  }
+//	
 
-	  /*##-2- Start the TIM Base generation in interrupt mode ####################*/
-  /* Start Channel1 */
-  if (HAL_TIM_Base_Start_IT(&ADA_TimHandle) != HAL_OK)
-  {
-    /* Starting Error */
-    Error_Handler();
-  }
-	
-		  /*##-2- Start the TIM Base generation in interrupt mode ####################*/
-  /* Start Channel1 */
-  if (HAL_TIM_Base_Start_IT(&UART_TimHandle) != HAL_OK)
-  {
-    /* Starting Error */
-    Error_Handler();
-  }
-	
-	
-	
+
+//  /*##-2- Start the TIM Base generation in interrupt mode ####################*/
+//  /* Start Channel1 */
+//  if (HAL_TIM_Base_Start_IT(&TimHandle) != HAL_OK)
+//  {
+//    /* Starting Error */
+//    Error_Handler();
+//  }
+
+//	  /*##-2- Start the TIM Base generation in interrupt mode ####################*/
+//  /* Start Channel1 */
+//  if (HAL_TIM_Base_Start_IT(&ADA_TimHandle) != HAL_OK)
+//  {
+//    /* Starting Error */
+//    Error_Handler();
+//  }
+//	
+
+//	
+//	
+//	
+
+ GPIO_Init();
+
+		// Start up UART if required for Debug
+ UART_Init();
+ 
+ UART_Timer_Init();
 
 
 //  /* Infinite loop */
   while (1)
   {
 
-		
+		/*
 		// if the HAL SPI is finished, pull the spi enable pin low, could change this to simply toggle
 		if( (HAL_SPI_GetState(&SpiHandle) == HAL_SPI_STATE_READY) && (SPI_STMF0_FLAG==1) )
 		{
@@ -274,9 +204,11 @@ int main(void)
 			 HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);  // set low
        SPI_STMF0_FLAG=0;
 		}
-		
-		
-		
+		*/
+	//	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);  // set low
+	//	HAL_Delay(1000);
+	//	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_SET);  // set high
+	//	HAL_Delay(1000);
   }
 }
 
@@ -302,6 +234,103 @@ int main(void)
   */
 	
 	
+void GPIO_Init(void)
+{
+		 GPIO_InitTypeDef  gpio_init_structure_new; // define an object for the GPIO
+   	__HAL_RCC_GPIOI_CLK_ENABLE();  // D7 or PI3 is on port I so enable the GPIO update clock (although it isactually enabled already by the LEDs)
+
+	  gpio_init_structure_new.Pin = GPIO_PIN_0 | GPIO_PIN_3 ;
+		//gpio_init_structure.Pin = GPIO_PIN_0 ;
+    gpio_init_structure_new.Mode = GPIO_MODE_OUTPUT_PP;
+    gpio_init_structure_new.Pull = GPIO_NOPULL;
+    gpio_init_structure_new.Speed = GPIO_SPEED_HIGH;
+  
+    HAL_GPIO_Init(GPIOI, &gpio_init_structure_new); // initialise this GPIO
+    HAL_GPIO_WritePin(GPIOI, GPIO_PIN_3, GPIO_PIN_RESET);  // set low
+		HAL_GPIO_WritePin(GPIOI, GPIO_PIN_0, GPIO_PIN_SET);  // set CS pin high
+    HAL_Delay(1);  
+		
+		GPIO_InitTypeDef  gpio_init_structure_b; // define an object for the GPIO
+		__HAL_RCC_GPIOB_CLK_ENABLE();  // clock for port B gpios
+		gpio_init_structure_b.Pin = GPIO_PIN_8; 
+		gpio_init_structure_b.Mode = GPIO_MODE_OUTPUT_PP;
+    gpio_init_structure_b.Pull = GPIO_NOPULL;
+    gpio_init_structure_b.Speed = GPIO_SPEED_HIGH;
+		HAL_GPIO_Init(GPIOB, &gpio_init_structure_b); // initialise this GPIO
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);  // set low
+
+    HAL_Delay(100);
+}	
+void SPI_Init(void)
+{
+	  /*##-1- Configure the SPI peripheral #######################################*/
+  /* Set the SPI parameters */
+  SpiHandle.Instance               = SPIx;
+  SpiHandle.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
+  SpiHandle.Init.Direction         = SPI_DIRECTION_2LINES;
+  SpiHandle.Init.CLKPhase          = SPI_PHASE_1EDGE;
+  SpiHandle.Init.CLKPolarity       = SPI_POLARITY_HIGH;
+  SpiHandle.Init.DataSize          = SPI_DATASIZE_8BIT;
+  SpiHandle.Init.FirstBit          = SPI_FIRSTBIT_MSB;
+  SpiHandle.Init.TIMode            = SPI_TIMODE_DISABLE;
+  SpiHandle.Init.CRCCalculation    = SPI_CRCCALCULATION_DISABLE;
+  SpiHandle.Init.CRCPolynomial     = 7;
+  SpiHandle.Init.NSS               = SPI_NSS_SOFT;
+  SpiHandle.Init.Mode = SPI_MODE_MASTER;
+}
+void UART_Init(void)
+{
+	
+		  /*##-1- Configure the UART peripheral ######################################*/
+  /* Put the USART peripheral in the Asynchronous mode (UART Mode) */
+  /* UART configured as follows:
+      - Word Length = 8 Bits
+      - Stop Bit = One Stop bit
+      - Parity = None
+      - BaudRate = 9600 baud
+      - Hardware flow control disabled (RTS and CTS signals) */
+  UartHandle.Instance        = USARTx;
+
+  UartHandle.Init.BaudRate   = 230400;
+  UartHandle.Init.WordLength = UART_WORDLENGTH_8B;
+  UartHandle.Init.StopBits   = UART_STOPBITS_1;
+  UartHandle.Init.Parity     = UART_PARITY_NONE;
+  UartHandle.Init.HwFlowCtl  = UART_HWCONTROL_NONE;
+  UartHandle.Init.Mode       = UART_MODE_TX_RX;
+  if(HAL_UART_DeInit(&UartHandle) != HAL_OK)
+  {
+    Error_Handler();
+  }  
+  if(HAL_UART_Init(&UartHandle) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  
+	
+}
+
+void UART_Timer_Init(void)
+{
+		UART_TimHandle.Instance = UART_TIMx; 
+	UART_TimHandle.Init.Period            = 100000 - 1;
+  UART_TimHandle.Init.Prescaler         = uwPrescalerValue;
+  UART_TimHandle.Init.ClockDivision     = 0;
+  UART_TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;
+  UART_TimHandle.Init.RepetitionCounter = 0;
+
+	if (HAL_TIM_Base_Init(&UART_TimHandle) != HAL_OK)
+		{
+			/* Initialization Error */
+			Error_Handler();
+		}
+		
+	/*##-2- Start the TIM Base generation in interrupt mode ####################*/
+	if (HAL_TIM_Base_Start_IT(&UART_TimHandle) != HAL_OK)
+		{
+		/* Starting Error */
+			Error_Handler();
+		}
+	}
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
@@ -309,9 +338,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	
 	    if (htim->Instance==TIM3) //check if this assosiated with TIM3
       {
-			//	BSP_LED_Toggle(LED1); 
-			//	HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer, strlen(aTxBuffer));
-				  HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)SPI_RxBuffer, strlen(SPI_RxBuffer)); //send what is recieved from the SPI
+
 			}
 			
 			if (htim->Instance==TIM4) //check if this assosiated with TIM3
@@ -345,10 +372,22 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			//	HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer, strlen(aTxBuffer));
 			}
 			
-			if (htim->Instance==TIM2) //check if this assosiated with TIM3
+			if (htim->Instance==TIM2) //check if this assosiated with the UART clock
       {
-			//	BSP_LED_Toggle(LED1); 
+			  	BSP_LED_Toggle(LED1); 
 			//	HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer, strlen(aTxBuffer));
+			//	  HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)SPI_RxBuffer, strlen(SPI_RxBuffer)); //send what is recieved from the SPI
+				
+						if(LED_Test_Flag==0)
+		{
+			LED_Test_Flag=1;
+			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_SET);  // set high
+		}
+		else
+		{
+			LED_Test_Flag=0;
+			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);  // set high
+		}
 			}
 			
 }

@@ -175,7 +175,7 @@ int main(void)
 	
 	
 	  /* -2- Configure EXTI_Line0 (connected to PA.00 pin) in interrupt mode */
-  EXTI0_1_IRQHandler_Config();
+  //EXTI0_1_IRQHandler_Config();
 	
 		  /* -2- Configure EXTI_Line0 (connected to PA.04 pin) in interrupt mode */
   EXTI4_15_IRQHandler_Config();
@@ -184,7 +184,7 @@ int main(void)
  //UART_Init();
 
   // Start up SPI 
-  //SPI_Init();
+  SPI_Init();
 	
 	// Start up ADC
   //ADC_Init();
@@ -217,7 +217,7 @@ int main(void)
 	//	HAL_Delay(1000);
 	//	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_RESET);  // set high
 	//	HAL_Delay(1000);
-	//	SPI_Handler_Function(); // function that handles slave SPI stuff
+		SPI_Handler_Function(); // function that handles slave SPI stuff
 	}
 	
 	
