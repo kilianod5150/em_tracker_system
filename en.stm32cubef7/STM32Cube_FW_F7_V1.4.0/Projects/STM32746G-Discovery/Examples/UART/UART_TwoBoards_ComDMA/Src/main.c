@@ -198,19 +198,19 @@ int main(void)
        + ClockDivision = 0
        + Counter direction = Up
   */
-  TimHandle.Init.Period            = 10000 - 1;
+  TimHandle.Init.Period            = 100000 - 1;
   TimHandle.Init.Prescaler         = uwPrescalerValue;
   TimHandle.Init.ClockDivision     = 0;
   TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;
   TimHandle.Init.RepetitionCounter = 0;
 	
-	ADA_TimHandle.Init.Period            = 100000 - 1;
+	ADA_TimHandle.Init.Period            = 1000000 - 1;
   ADA_TimHandle.Init.Prescaler         = uwPrescalerValue;
   ADA_TimHandle.Init.ClockDivision     = 0;
   ADA_TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;
   ADA_TimHandle.Init.RepetitionCounter = 0;
 	
-	UART_TimHandle.Init.Period            = 100000 - 1;
+	UART_TimHandle.Init.Period            = 1000000 - 1;
   UART_TimHandle.Init.Prescaler         = uwPrescalerValue;
   UART_TimHandle.Init.ClockDivision     = 0;
   UART_TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;

@@ -28,22 +28,32 @@ Project File Date:  02/15/2017
 *** Using Compiler 'V5.06 update 2 (build 183)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'STM32F0308-Discovery'
 compiling main.c...
-..\Src\main.c(674): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "const char *"
+..\Src\main.c(680): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "const char *"
     if(HAL_UART_Transmit(&UartHandle, (uint8_t*)otherbuffer, strlen(otherbuffer), 5000)!= HAL_OK)
-..\Src\main.c(798): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "const char *"
+..\Src\main.c(860): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "const char *"
   	  if(HAL_UART_Transmit(&UartHandle, (uint8_t*)otherbuffer2, strlen(otherbuffer2), 5000)!= HAL_OK)
-..\Src\main.c(312): warning:  #177-D: function "TIM_Init" was declared but never referenced
+..\Src\main.c(649): warning:  #177-D: function "UART_Init" was declared but never referenced
+  static void UART_Init(void)
+..\Src\main.c(230): warning:  #177-D: function "SPI_Init" was declared but never referenced
+  static void SPI_Init(void)
+..\Src\main.c(474): warning:  #177-D: function "ADC_Init" was declared but never referenced
+  static void ADC_Init(void)
+..\Src\main.c(318): warning:  #177-D: function "TIM_Init" was declared but never referenced
   static void TIM_Init(void)
-..\Src\main.c(531): warning:  #177-D: function "Demodulator_Init" was declared but never referenced
+..\Src\main.c(389): warning:  #177-D: function "TIM_PWM_Init" was declared but never referenced
+  static void TIM_PWM_Init(void)
+..\Src\main.c(537): warning:  #177-D: function "Demodulator_Init" was declared but never referenced
   static void Demodulator_Init(void)
-..\Src\main.c(861): warning:  #177-D: function "Buffercmp" was declared but never referenced
+..\Src\main.c(923): warning:  #177-D: function "Buffercmp" was declared but never referenced
   static uint16_t Buffercmp(uint8_t* pBuffer1, uint8_t* pBuffer2, uint16_t BufferLength)
-..\Src\main.c(812): warning:  #177-D: function "Timeout_Error_Handler" was declared but never referenced
+..\Src\main.c(874): warning:  #177-D: function "Timeout_Error_Handler" was declared but never referenced
   static void Timeout_Error_Handler(void)
-..\Src\main.c: 6 warnings, 0 errors
+..\Src\main.c(278): warning:  #177-D: function "SPI_Handler_Function" was declared but never referenced
+  static void SPI_Handler_Function(void)
+..\Src\main.c: 11 warnings, 0 errors
 linking...
-Program Size: Code=9652 RO-data=244 RW-data=60 ZI-data=1596  
-"STM32F0308-Discovery\STM32F0308-Discovery.axf" - 0 Error(s), 6 Warning(s).
+Program Size: Code=3100 RO-data=228 RW-data=32 ZI-data=1128  
+"STM32F0308-Discovery\STM32F0308-Discovery.axf" - 0 Error(s), 11 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -61,7 +71,7 @@ Package Vendor: ARM
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.0.0
-Build Time Elapsed:  00:00:05
+Build Time Elapsed:  00:00:04
 </pre>
 </body>
 </html>

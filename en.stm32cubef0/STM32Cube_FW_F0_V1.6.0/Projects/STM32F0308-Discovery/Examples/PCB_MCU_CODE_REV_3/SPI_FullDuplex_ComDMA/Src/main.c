@@ -136,9 +136,11 @@ static void Demodulator_Init(void);
 static uint16_t Buffercmp(uint8_t *pBuffer1, uint8_t *pBuffer2, uint16_t BufferLength);
 static void Timeout_Error_Handler(void);
 static void EXTI0_1_IRQHandler_Config(void);
+static void EXTI4_15_IRQHandler_Config(void);
 static void SPI_Handler_Function(void);
 /* Private functions ---------------------------------------------------------*/
 uint8_t SPI_Flag=0;
+uint8_t LED_Test_Flag=0; 
 /**
   * @brief  Main program
   * @param  None
@@ -167,28 +169,31 @@ int main(void)
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_SET);  // set high
 	  HAL_Delay(1000); // seemingly we need this...?
   //  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1|GPIO_PIN_3, GPIO_PIN_RESET);  // set low
-	//	HAL_Delay(1000);
+		HAL_Delay(1000);
 	
 	
 	
 	
 	  /* -2- Configure EXTI_Line0 (connected to PA.00 pin) in interrupt mode */
   EXTI0_1_IRQHandler_Config();
+	
+		  /* -2- Configure EXTI_Line0 (connected to PA.04 pin) in interrupt mode */
+  EXTI4_15_IRQHandler_Config();
 
 		// Start up UART if required for Debug
-  UART_Init();
+ //UART_Init();
 
   // Start up SPI 
-  SPI_Init();
+  //SPI_Init();
 	
 	// Start up ADC
-  ADC_Init();
+  //ADC_Init();
 	
 	//Start Up main sample rate clock
 	//TIM_Init();
 	
 	//Start up PWM output for coil driver
-	TIM_PWM_Init();
+	//TIM_PWM_Init();
 	
 	//Run any calculations required for the demodulator, generating sine tables for example
 	//Demodulator_Init(); //something in here causing issues
@@ -199,7 +204,8 @@ int main(void)
 
 
 
-
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_SET);  // set high
+		HAL_Delay(1000);
 
 
 	
@@ -207,11 +213,11 @@ int main(void)
 	// put low priority timing stuff in here
   while (1)
   {
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_SET);  // set high
-		HAL_Delay(1000);
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_RESET);  // set high
-		HAL_Delay(1000);
-		SPI_Handler_Function(); // function that handles slave SPI stuff
+	//	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_SET);  // set high
+	//	HAL_Delay(1000);
+	//	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_RESET);  // set high
+	//	HAL_Delay(1000);
+	//	SPI_Handler_Function(); // function that handles slave SPI stuff
 	}
 	
 	
@@ -700,13 +706,38 @@ static void EXTI0_1_IRQHandler_Config(void)
 
   /* Configure PA.00 pin as input floating */
   GPIO_InitStructure.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStructure.Pull = GPIO_NOPULL;
-  GPIO_InitStructure.Pin = GPIO_PIN_4;
+  GPIO_InitStructure.Pull = GPIO_PULLUP;
+  GPIO_InitStructure.Pin = GPIO_PIN_0;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
 
   /* Enable and set EXTI line 0 Interrupt to the lowest priority */
   HAL_NVIC_SetPriority(EXTI0_1_IRQn, 2, 0);
   HAL_NVIC_EnableIRQ(EXTI0_1_IRQn);
+}
+
+/**
+  * @brief  Configures EXTI line 0 (connected to PA.00 pin) in interrupt mode
+  * @param  None
+  * @retval None
+  */
+
+
+static void EXTI4_15_IRQHandler_Config(void)
+{
+  GPIO_InitTypeDef   GPIO_InitStructure;
+
+  /* Enable GPIOA clock */
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+
+  /* Configure PA.00 pin as input floating */
+  GPIO_InitStructure.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStructure.Pull = GPIO_PULLUP;
+  GPIO_InitStructure.Pin = GPIO_PIN_4;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+  /* Enable and set EXTI line 0 Interrupt to the lowest priority */
+  HAL_NVIC_SetPriority(EXTI4_15_IRQn, 3, 0);
+  HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
 }
 
 /**
@@ -716,8 +747,39 @@ static void EXTI0_1_IRQHandler_Config(void)
   */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-  if (GPIO_Pin == GPIO_PIN_4)
+  if (GPIO_Pin == GPIO_PIN_0)
+	//if(1)
   {
+		if(LED_Test_Flag==0)
+		{
+			LED_Test_Flag=1;
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_SET);  // set high
+		}
+		else
+		{
+			LED_Test_Flag=0;
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_RESET);  // set high
+		}
+    /* Toggle LED3 */
+    //BSP_LED_Toggle(LED3);
+		
+    SPI_Flag=1;
+	
+  }
+	
+	  if (GPIO_Pin == GPIO_PIN_4)
+	//if(1)
+  {
+		if(LED_Test_Flag==0)
+		{
+			LED_Test_Flag=1;
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_SET);  // set high
+		}
+		else
+		{
+			LED_Test_Flag=0;
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_RESET);  // set high
+		}
     /* Toggle LED3 */
     //BSP_LED_Toggle(LED3);
 		
@@ -815,9 +877,9 @@ static void Timeout_Error_Handler(void)
   while(1)
   {
    // BSP_LED_On(LED4);
-    HAL_Delay(500);
+   // HAL_Delay(500);
    // BSP_LED_Off(LED4);
-    HAL_Delay(500);
+   // HAL_Delay(500);
   }
 }
 

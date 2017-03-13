@@ -148,9 +148,13 @@ void SPIx_DMA_RX_IRQHandler(void)
   */
 void EXTI0_1_IRQHandler(void)
 {
-  HAL_GPIO_EXTI_IRQHandler(USER_BUTTON_PIN);
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
 }
 
+void EXTI4_15_IRQHandler(void)
+{
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_4);
+}
 
 /**
   * @}
