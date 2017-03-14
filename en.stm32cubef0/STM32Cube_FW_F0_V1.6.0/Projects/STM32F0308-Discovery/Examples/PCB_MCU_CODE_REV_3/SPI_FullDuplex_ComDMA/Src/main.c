@@ -763,7 +763,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     /* Toggle LED3 */
     //BSP_LED_Toggle(LED3);
 		
-    SPI_Flag=1;
+    //SPI_Flag=1;
 	
   }
 	

@@ -40,7 +40,7 @@ TIM_HandleTypeDef    UART_TimHandle; // TIM handle for UART acquisition
 uint32_t uwPrescalerValue = 0;
 
 /* Buffer used for transmission */
-uint8_t aTxBuffer[] = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz\n";
+uint8_t aTxBuffer[] = "\n abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz\n";
 uint8_t SPI_TxBuffer[] = "hello";
 uint8_t SPI_RxBuffer[SPI_BUFFERSIZE];
 uint8_t SPI_STMF0_FLAG=0; // flag for handling SPI comms to the STM32F0, flag is 0 when free, and 1 when it is active
@@ -58,6 +58,7 @@ static void CPU_CACHE_Enable(void);
 static void UART_Init(void);
 static void UART_Timer_Init(void);
 static void SPI_Init(void);
+static void SPI_F0_COM_Init(void);
 static void GPIO_Init(void);
 static void ADC_Init(void);
 static void TIM_Init(void);
@@ -123,22 +124,9 @@ int main(void)
 	  /* Compute the prescaler value to have TIMx counter clock equal to 100000 Hz */
   uwPrescalerValue = (uint32_t)((SystemCoreClock / 2) / 100000) - 1;
 
-  /* Set TIMx instance */
-  TimHandle.Instance = TIMx;
-  ADA_TimHandle.Instance = ADA_TIMx; 
 
-  /* Initialize TIMx peripheral as follows:
-       + Period = 10000 - 1
-       + Prescaler = ((SystemCoreClock / 2)/10000) - 1
-       + ClockDivision = 0
-       + Counter direction = Up
-  */
-  TimHandle.Init.Period            = 100000 - 1;
-  TimHandle.Init.Prescaler         = uwPrescalerValue;
-  TimHandle.Init.ClockDivision     = 0;
-  TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;
-  TimHandle.Init.RepetitionCounter = 0;
 	
+	ADA_TimHandle.Instance = ADA_TIMx; 
 	ADA_TimHandle.Init.Period            = 1000000 - 1;
   ADA_TimHandle.Init.Prescaler         = uwPrescalerValue;
   ADA_TimHandle.Init.ClockDivision     = 0;
@@ -149,12 +137,7 @@ int main(void)
 
 		
 
-//  if (HAL_TIM_Base_Init(&TimHandle) != HAL_OK)
-//  {
-//    /* Initialization Error */
-//    Error_Handler();
-//  }
-//	
+
 //	  if (HAL_TIM_Base_Init(&ADA_TimHandle) != HAL_OK)
 //  {
 //    /* Initialization Error */
@@ -163,13 +146,7 @@ int main(void)
 //	
 
 
-//  /*##-2- Start the TIM Base generation in interrupt mode ####################*/
-//  /* Start Channel1 */
-//  if (HAL_TIM_Base_Start_IT(&TimHandle) != HAL_OK)
-//  {
-//    /* Starting Error */
-//    Error_Handler();
-//  }
+
 
 //	  /*##-2- Start the TIM Base generation in interrupt mode ####################*/
 //  /* Start Channel1 */
@@ -186,7 +163,11 @@ int main(void)
 
  GPIO_Init();
 
+ SPI_Init();
 		// Start up UART if required for Debug
+		
+ SPI_F0_COM_Init();
+ 
  UART_Init();
  
  UART_Timer_Init();
@@ -196,15 +177,15 @@ int main(void)
   while (1)
   {
 
-		/*
+		///*
 		// if the HAL SPI is finished, pull the spi enable pin low, could change this to simply toggle
 		if( (HAL_SPI_GetState(&SpiHandle) == HAL_SPI_STATE_READY) && (SPI_STMF0_FLAG==1) )
 		{
-		//	 HAL_Delay(100);
+			 HAL_Delay(1000);
 			 HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);  // set low
        SPI_STMF0_FLAG=0;
 		}
-		*/
+	//	*/
 	//	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);  // set low
 	//	HAL_Delay(1000);
 	//	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_SET);  // set high
@@ -278,6 +259,32 @@ void SPI_Init(void)
   SpiHandle.Init.NSS               = SPI_NSS_SOFT;
   SpiHandle.Init.Mode = SPI_MODE_MASTER;
 }
+
+void SPI_F0_COM_Init(void)
+{
+	  /* Set TIMx instance */
+  TimHandle.Instance = TIMx;
+
+  TimHandle.Init.Period            = 100000 - 1;
+  TimHandle.Init.Prescaler         = uwPrescalerValue;
+  TimHandle.Init.ClockDivision     = 0;
+  TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;
+  TimHandle.Init.RepetitionCounter = 0;
+	
+		if (HAL_TIM_Base_Init(&TimHandle) != HAL_OK)
+			{
+				/* Initialization Error */
+				Error_Handler();
+			}
+
+		if (HAL_TIM_Base_Start_IT(&TimHandle) != HAL_OK)
+			{
+				/* Starting Error */
+				Error_Handler();
+			}
+}
+
+
 void UART_Init(void)
 {
 	
@@ -312,7 +319,7 @@ void UART_Init(void)
 void UART_Timer_Init(void)
 {
 		UART_TimHandle.Instance = UART_TIMx; 
-	UART_TimHandle.Init.Period            = 100000 - 1;
+	UART_TimHandle.Init.Period            = 200000 - 1;
   UART_TimHandle.Init.Prescaler         = uwPrescalerValue;
   UART_TimHandle.Init.ClockDivision     = 0;
   UART_TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;
@@ -336,29 +343,28 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	
 	
-	    if (htim->Instance==TIM3) //check if this assosiated with TIM3
+	    if (htim->Instance==TIM4) //check if this assosiated with TIM3, this triggers the ADA conversion
       {
 
 			}
 			
-			if (htim->Instance==TIM4) //check if this assosiated with TIM3
+			if (htim->Instance==TIM3) //check if this assosiated with TIM3, this is the clock for talking to the F0 MCU
       {
 				
 				//need to check which timer to use
 			//	HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer, strlen(aTxBuffer));
-						if(HAL_SPI_GetState(&SpiHandle) == HAL_SPI_STATE_READY)
-		{
-			BSP_LED_Toggle(LED1); 
-		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_SET);  // set high
+				if(HAL_SPI_GetState(&SpiHandle) == HAL_SPI_STATE_READY)
+				{
+					BSP_LED_Toggle(LED1); 
+					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_SET);  // set high
 		
-	  if(HAL_SPI_TransmitReceive_DMA(&SpiHandle, (uint8_t*)SPI_TxBuffer, (uint8_t *)SPI_RxBuffer, SPI_BUFFERSIZE) != HAL_OK)
-  {
-    /* Transfer error in transmission process */
-    Error_Handler();
-  }	
-	
-	
-	SPI_STMF0_FLAG=1;
+					if(HAL_SPI_TransmitReceive_DMA(&SpiHandle, (uint8_t*)SPI_TxBuffer, (uint8_t *)SPI_RxBuffer, SPI_BUFFERSIZE) != HAL_OK)
+					{
+						/* Transfer error in transmission process */
+						Error_Handler();
+					}	
+
+					SPI_STMF0_FLAG=1;
 	
 //		while (HAL_SPI_GetState(&SpiHandle) != HAL_SPI_STATE_READY)
 // {
@@ -375,9 +381,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			if (htim->Instance==TIM2) //check if this assosiated with the UART clock
       {
 			  	BSP_LED_Toggle(LED1); 
-			//	HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer, strlen(aTxBuffer));
-			//	  HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)SPI_RxBuffer, strlen(SPI_RxBuffer)); //send what is recieved from the SPI
+			  	HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer, strlen(aTxBuffer));
+				  HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)SPI_RxBuffer, strlen(SPI_RxBuffer)); //send what is recieved from the SPI
 				
+				/*
 						if(LED_Test_Flag==0)
 		{
 			LED_Test_Flag=1;
@@ -388,6 +395,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			LED_Test_Flag=0;
 			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);  // set high
 		}
+				*/
+				
 			}
 			
 }
