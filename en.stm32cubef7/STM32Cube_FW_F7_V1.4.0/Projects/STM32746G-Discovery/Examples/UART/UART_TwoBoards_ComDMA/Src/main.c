@@ -41,6 +41,8 @@ uint32_t uwPrescalerValue = 0;
 
 /* Buffer used for transmission */
 uint8_t aTxBuffer[] = "\n abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz\n";
+uint8_t aTxBuffer_Error[] = "\n ERROR!\n";
+
 uint8_t SPI_TxBuffer[] = "hello";
 uint8_t SPI_RxBuffer[SPI_BUFFERSIZE];
 uint8_t SPI_STMF0_FLAG=0; // flag for handling SPI comms to the STM32F0, flag is 0 when free, and 1 when it is active
@@ -60,7 +62,7 @@ static void UART_Timer_Init(void);
 static void SPI_Init(void);
 static void SPI_F0_COM_Init(void);
 static void GPIO_Init(void);
-static void ADC_Init(void);
+static void ADA_Timer_Init(void);
 static void TIM_Init(void);
 uint8_t LED_Test_Flag=0; 
 /* Private define ------------------------------------------------------------*/
@@ -110,52 +112,12 @@ int main(void)
   /* Configure the system clock to 216 MHz */
   SystemClock_Config();
   
-  /* Configure LED1 */
-  BSP_LED_Init(LED1);
-	
-
 
   HAL_Delay(5);  
 	
 	
-
-
-
 	  /* Compute the prescaler value to have TIMx counter clock equal to 100000 Hz */
   uwPrescalerValue = (uint32_t)((SystemCoreClock / 2) / 100000) - 1;
-
-
-	
-	ADA_TimHandle.Instance = ADA_TIMx; 
-	ADA_TimHandle.Init.Period            = 1000000 - 1;
-  ADA_TimHandle.Init.Prescaler         = uwPrescalerValue;
-  ADA_TimHandle.Init.ClockDivision     = 0;
-  ADA_TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;
-  ADA_TimHandle.Init.RepetitionCounter = 0;
-	
-	
-
-		
-
-
-//	  if (HAL_TIM_Base_Init(&ADA_TimHandle) != HAL_OK)
-//  {
-//    /* Initialization Error */
-//    Error_Handler();
-//  }
-//	
-
-
-
-
-//	  /*##-2- Start the TIM Base generation in interrupt mode ####################*/
-//  /* Start Channel1 */
-//  if (HAL_TIM_Base_Start_IT(&ADA_TimHandle) != HAL_OK)
-//  {
-//    /* Starting Error */
-//    Error_Handler();
-//  }
-//	
 
 //	
 //	
@@ -170,8 +132,11 @@ int main(void)
  
  UART_Init();
  
- UART_Timer_Init();
+ HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer, strlen(aTxBuffer));
+ 
+	UART_Timer_Init();
 
+	//ADA_Timer_Init();
 
 //  /* Infinite loop */
   while (1)
@@ -179,7 +144,8 @@ int main(void)
 
 		///*
 		// if the HAL SPI is finished, pull the spi enable pin low, could change this to simply toggle
-		if( (HAL_SPI_GetState(&SpiHandle) == HAL_SPI_STATE_READY) && (SPI_STMF0_FLAG==1) )
+		//if( (HAL_SPI_GetState(&SpiHandle) == HAL_SPI_STATE_READY) && (SPI_STMF0_FLAG==1) )
+			if( (SPI_STMF0_FLAG==1) )
 		{
 			 HAL_Delay(1000);
 			 HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);  // set low
@@ -193,27 +159,7 @@ int main(void)
   }
 }
 
-/**
-  * @brief  System Clock Configuration
-  *         The system Clock is configured as follow : 
-  *            System Clock source            = PLL (HSE)
-  *            SYSCLK(Hz)                     = 216000000
-  *            HCLK(Hz)                       = 216000000
-  *            AHB Prescaler                  = 1
-  *            APB1 Prescaler                 = 4
-  *            APB2 Prescaler                 = 2
-  *            HSE Frequency(Hz)              = 25000000
-  *            PLL_M                          = 25
-  *            PLL_N                          = 432
-  *            PLL_P                          = 2
-  *            PLL_Q                          = 9
-  *            VDD(V)                         = 3.3
-  *            Main regulator output voltage  = Scale1 mode
-  *            Flash Latency(WS)              = 7
-  * @param  None
-  * @retval None
-  */
-	
+
 	
 void GPIO_Init(void)
 {
@@ -258,6 +204,12 @@ void SPI_Init(void)
   SpiHandle.Init.CRCPolynomial     = 7;
   SpiHandle.Init.NSS               = SPI_NSS_SOFT;
   SpiHandle.Init.Mode = SPI_MODE_MASTER;
+	
+	  if(HAL_SPI_Init(&SpiHandle) != HAL_OK)
+  {
+    /* Initialization Error */
+    Error_Handler();
+  }
 }
 
 void SPI_F0_COM_Init(void)
@@ -339,6 +291,34 @@ void UART_Timer_Init(void)
 		}
 	}
 
+void ADA_Timer_Init(void)
+{
+
+	
+	ADA_TimHandle.Instance = ADA_TIMx; 
+	ADA_TimHandle.Init.Period            = 1000000 - 1;
+  ADA_TimHandle.Init.Prescaler         = uwPrescalerValue;
+  ADA_TimHandle.Init.ClockDivision     = 0;
+  ADA_TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;
+  ADA_TimHandle.Init.RepetitionCounter = 0;
+	
+	
+	  if (HAL_TIM_Base_Init(&ADA_TimHandle) != HAL_OK)
+  {
+    /* Initialization Error */
+    Error_Handler();
+  }
+		  /*##-2- Start the TIM Base generation in interrupt mode ####################*/
+  /* Start Channel1 */
+  if (HAL_TIM_Base_Start_IT(&ADA_TimHandle) != HAL_OK)
+  {
+    /* Starting Error */
+    Error_Handler();
+  }
+	
+
+}
+
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	
@@ -355,7 +335,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			//	HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer, strlen(aTxBuffer));
 				if(HAL_SPI_GetState(&SpiHandle) == HAL_SPI_STATE_READY)
 				{
-					BSP_LED_Toggle(LED1); 
+					//BSP_LED_Toggle(LED1); 
 					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_SET);  // set high
 		
 					if(HAL_SPI_TransmitReceive_DMA(&SpiHandle, (uint8_t*)SPI_TxBuffer, (uint8_t *)SPI_RxBuffer, SPI_BUFFERSIZE) != HAL_OK)
@@ -366,37 +346,21 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 					SPI_STMF0_FLAG=1;
 	
-//		while (HAL_SPI_GetState(&SpiHandle) != HAL_SPI_STATE_READY)
-// {
-// } 
+				while (HAL_SPI_GetState(&SpiHandle) != HAL_SPI_STATE_READY)
+				{
+				} 
 		
-   
-//	HAL_Delay(100);
-// HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);  // set low
-	}
-			//	BSP_LED_Toggle(LED1); 
-			//	HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer, strlen(aTxBuffer));
+
+				}
+
 			}
 			
 			if (htim->Instance==TIM2) //check if this assosiated with the UART clock
       {
-			  	BSP_LED_Toggle(LED1); 
+
 			  	HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer, strlen(aTxBuffer));
 				  HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)SPI_RxBuffer, strlen(SPI_RxBuffer)); //send what is recieved from the SPI
-				
-				/*
-						if(LED_Test_Flag==0)
-		{
-			LED_Test_Flag=1;
-			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_SET);  // set high
-		}
-		else
-		{
-			LED_Test_Flag=0;
-			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);  // set high
-		}
-				*/
-				
+			
 			}
 			
 }
@@ -405,6 +369,29 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 void SystemClock_Config(void)
 {
+	
+	/**
+  * @brief  System Clock Configuration
+  *         The system Clock is configured as follow : 
+  *            System Clock source            = PLL (HSE)
+  *            SYSCLK(Hz)                     = 216000000
+  *            HCLK(Hz)                       = 216000000
+  *            AHB Prescaler                  = 1
+  *            APB1 Prescaler                 = 4
+  *            APB2 Prescaler                 = 2
+  *            HSE Frequency(Hz)              = 25000000
+  *            PLL_M                          = 25
+  *            PLL_N                          = 432
+  *            PLL_P                          = 2
+  *            PLL_Q                          = 9
+  *            VDD(V)                         = 3.3
+  *            Main regulator output voltage  = Scale1 mode
+  *            Flash Latency(WS)              = 7
+  * @param  None
+  * @retval None
+  */
+	
+	
   RCC_ClkInitTypeDef RCC_ClkInitStruct;
   RCC_OscInitTypeDef RCC_OscInitStruct;
   HAL_StatusTypeDef ret = HAL_OK;
@@ -530,11 +517,13 @@ static void Error_Handler(void)
 {
   /* Turn LED1 on */
   //BSP_LED_On(LED1);
+	BSP_LED_Init(LED1);
   while(1)
   {
     /* Error if LED1 is slowly blinking (1 sec. period) */
- //   BSP_LED_Toggle(LED1); 
-  //  HAL_Delay(1000); 
+    BSP_LED_Toggle(LED1); 
+    HAL_Delay(100); 
+		//HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer_Error, strlen(aTxBuffer_Error));
   }  
 }
 

@@ -176,15 +176,15 @@ int main(void)
 	
 	  /* -2- Configure EXTI_Line0 (connected to PA.00 pin) in interrupt mode */
   //EXTI0_1_IRQHandler_Config();
-	
+	  // Start up SPI 
+  SPI_Init();
 		  /* -2- Configure EXTI_Line0 (connected to PA.04 pin) in interrupt mode */
   EXTI4_15_IRQHandler_Config();
 
 		// Start up UART if required for Debug
  //UART_Init();
 
-  // Start up SPI 
-  SPI_Init();
+
 	
 	// Start up ADC
   //ADC_Init();
@@ -265,11 +265,11 @@ static void SPI_Init(void)
 	  /*##-2- Start the Full Duplex Communication process ########################*/  
   /* While the SPI in TransmitReceive process, user can transmit data through 
      "aTxBuffer" buffer & receive data through "aRxBuffer" */
-  if(HAL_SPI_TransmitReceive_DMA(&SpiHandle, (uint8_t*)aTxBuffer, (uint8_t *)aRxBuffer, BUFFERSIZE) != HAL_OK)
-  {
+  //if(HAL_SPI_TransmitReceive_DMA(&SpiHandle, (uint8_t*)aTxBuffer, (uint8_t *)aRxBuffer, BUFFERSIZE) != HAL_OK)
+  //{
     /* Transfer error in transmission process */
-    Error_Handler();
-  }
+  //  Error_Handler();
+  //}
 
 	
 	
@@ -283,28 +283,28 @@ static void SPI_Handler_Function(void)
 		if( (SPI_Flag==1) && (HAL_SPI_STATE_READY) )
 		{
 			
-			  if (HAL_SPI_DeInit(&SpiHandle) != HAL_OK)
+			  if (HAL_SPI_DeInit(&SpiHandle) != HAL_OK) //disable spi
   {
     /* Initialization Error */
     Error_Handler();
   }
 	
-				  if (HAL_SPI_Init(&SpiHandle) != HAL_OK)
+			if (HAL_SPI_Init(&SpiHandle) != HAL_OK) //enable spi
   {
     /* Initialization Error */
     Error_Handler();
   }
 	
-	
+	//transmit and recieve
 		  if(HAL_SPI_TransmitReceive_DMA(&SpiHandle, (uint8_t*)aTxBuffer, (uint8_t *)aRxBuffer, BUFFERSIZE) != HAL_OK)
   {
     /* Transfer error in transmission process */
     Error_Handler();
   }
 		
-	while (HAL_SPI_GetState(&SpiHandle) != HAL_SPI_STATE_READY)
-  {
-  } 
+	//while (HAL_SPI_GetState(&SpiHandle) != HAL_SPI_STATE_READY) // wait until the transfer is finished
+  //{
+  //} 
   SPI_Flag=0;
 	
 	HAL_Delay(1);
@@ -850,17 +850,17 @@ void SystemClock_Config(void)
 void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
 {
   /* Turn LED3 on: Transfer in transmission/reception process is correct */
-  BSP_LED_On(LED3);
+ // BSP_LED_On(LED3);
 	
-		  if(HAL_UART_Transmit(&UartHandle, (uint8_t*)aRxBuffer, BUFFERSIZE, 1000)!= HAL_OK)
-  {
-    Error_Handler();   
-  }
+	//	  if(HAL_UART_Transmit(&UartHandle, (uint8_t*)aRxBuffer, BUFFERSIZE, 1000)!= HAL_OK)
+  //{
+  //  Error_Handler();   
+  //}
 	
-	  if(HAL_UART_Transmit(&UartHandle, (uint8_t*)otherbuffer2, strlen(otherbuffer2), 5000)!= HAL_OK)
-  {
-    Error_Handler();   
-  }
+	//  if(HAL_UART_Transmit(&UartHandle, (uint8_t*)otherbuffer2, strlen(otherbuffer2), 5000)!= HAL_OK)
+  //{
+  //  Error_Handler();   
+  //}
 	
 
 	
