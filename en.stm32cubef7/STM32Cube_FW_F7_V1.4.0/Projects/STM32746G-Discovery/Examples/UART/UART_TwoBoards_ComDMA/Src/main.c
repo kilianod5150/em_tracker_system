@@ -43,7 +43,7 @@ uint32_t uwPrescalerValue = 0;
 uint8_t aTxBuffer[] = "\n abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz\n";
 uint8_t aTxBuffer_Error[] = "\n ERROR!\n";
 
-uint8_t SPI_TxBuffer[] = "hello";
+uint8_t SPI_TxBuffer[] = "hello\n";
 uint8_t SPI_RxBuffer[SPI_BUFFERSIZE];
 uint8_t SPI_STMF0_FLAG=0; // flag for handling SPI comms to the STM32F0, flag is 0 when free, and 1 when it is active
 //uint8_t SPI_RxBuffer[] = "hello";
@@ -132,7 +132,7 @@ int main(void)
  
  UART_Init();
  
- HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer, strlen(aTxBuffer));
+ //HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer, strlen(aTxBuffer));
  
 	UART_Timer_Init();
 
@@ -147,7 +147,7 @@ int main(void)
 		//if( (HAL_SPI_GetState(&SpiHandle) == HAL_SPI_STATE_READY) && (SPI_STMF0_FLAG==1) )
 			if( (SPI_STMF0_FLAG==1) )
 		{
-			 HAL_Delay(1000);
+		//	 HAL_Delay(1000);
 			 HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);  // set low
        SPI_STMF0_FLAG=0;
 		}
@@ -193,7 +193,7 @@ void SPI_Init(void)
 	  /*##-1- Configure the SPI peripheral #######################################*/
   /* Set the SPI parameters */
   SpiHandle.Instance               = SPIx;
-  SpiHandle.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
+  SpiHandle.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
   SpiHandle.Init.Direction         = SPI_DIRECTION_2LINES;
   SpiHandle.Init.CLKPhase          = SPI_PHASE_1EDGE;
   SpiHandle.Init.CLKPolarity       = SPI_POLARITY_HIGH;
@@ -337,7 +337,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 				{
 					//BSP_LED_Toggle(LED1); 
 					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_SET);  // set high
-		
+		      //HAL_Delay(1); // give f0 time to begin spi process
+					
+					// short delay
+					for(int i=0; i<100000; i++)
+					{
+						
+					}
+					
+					
 					if(HAL_SPI_TransmitReceive_DMA(&SpiHandle, (uint8_t*)SPI_TxBuffer, (uint8_t *)SPI_RxBuffer, SPI_BUFFERSIZE) != HAL_OK)
 					{
 						/* Transfer error in transmission process */
@@ -345,10 +353,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 					}	
 
 					SPI_STMF0_FLAG=1;
-	
-				while (HAL_SPI_GetState(&SpiHandle) != HAL_SPI_STATE_READY)
-				{
-				} 
+//	
+//				while (HAL_SPI_GetState(&SpiHandle) != HAL_SPI_STATE_READY)
+//				{
+//				} 
 		
 
 				}
@@ -358,9 +366,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			if (htim->Instance==TIM2) //check if this assosiated with the UART clock
       {
 
-			  	HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer, strlen(aTxBuffer));
+			  	//HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer, strlen(aTxBuffer));
 				  HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)SPI_RxBuffer, strlen(SPI_RxBuffer)); //send what is recieved from the SPI
-			
+			    //HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)SPI_TxBuffer, 16); //send what is recieved from the SPI
+
 			}
 			
 }

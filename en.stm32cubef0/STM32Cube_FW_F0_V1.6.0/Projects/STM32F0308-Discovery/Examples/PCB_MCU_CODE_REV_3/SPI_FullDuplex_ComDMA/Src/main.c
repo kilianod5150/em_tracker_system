@@ -118,7 +118,7 @@ uint32_t uwPrescalerValue = 0;
  q31_t ADC_Value;
 
 /* Buffer used for transmission */
-uint8_t aTxBuffer[] = "hello";
+uint8_t aTxBuffer[] = "hello\n";
 uint8_t otherbuffer[] = "HELLO \n\n";
 uint8_t otherbuffer2[] = "\n";
 /* Buffer used for reception */
@@ -280,7 +280,8 @@ static void SPI_Handler_Function(void)
 	
 			
 		
-		if( (SPI_Flag==1) && (HAL_SPI_STATE_READY) )
+		//if( (SPI_Flag==1) && (HAL_SPI_GetState(&SpiHandle) == HAL_SPI_STATE_READY) )
+	  if( SPI_Flag==1)
 		{
 			
 			  if (HAL_SPI_DeInit(&SpiHandle) != HAL_OK) //disable spi
@@ -302,12 +303,13 @@ static void SPI_Handler_Function(void)
     Error_Handler();
   }
 		
-	//while (HAL_SPI_GetState(&SpiHandle) != HAL_SPI_STATE_READY) // wait until the transfer is finished
-  //{
-  //} 
+	while (HAL_SPI_GetState(&SpiHandle) != HAL_SPI_STATE_READY) // wait until the transfer is finished
+  {
+		
+  } 
   SPI_Flag=0;
 	
-	HAL_Delay(1);
+	//HAL_Delay(1);
   }
 		
 
@@ -747,26 +749,7 @@ static void EXTI4_15_IRQHandler_Config(void)
   */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-  if (GPIO_Pin == GPIO_PIN_0)
-	//if(1)
-  {
-		if(LED_Test_Flag==0)
-		{
-			LED_Test_Flag=1;
-			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_SET);  // set high
-		}
-		else
-		{
-			LED_Test_Flag=0;
-			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_RESET);  // set high
-		}
-    /* Toggle LED3 */
-    //BSP_LED_Toggle(LED3);
-		
-    //SPI_Flag=1;
-	
-  }
-	
+
 	  if (GPIO_Pin == GPIO_PIN_4)
 	//if(1)
   {
@@ -783,9 +766,32 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     /* Toggle LED3 */
     //BSP_LED_Toggle(LED3);
 		
-    SPI_Flag=1;
+    SPI_Flag=1; // flag to run the SPI handler function
 	
   }
+	
+	
+//	  if (GPIO_Pin == GPIO_PIN_0)
+//	//if(1)
+//  {
+//		if(LED_Test_Flag==0)
+//		{
+//			LED_Test_Flag=1;
+//			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_SET);  // set high
+//		}
+//		else
+//		{
+//			LED_Test_Flag=0;
+//			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_RESET);  // set high
+//		}
+//    /* Toggle LED3 */
+//    //BSP_LED_Toggle(LED3);
+//		
+//    //SPI_Flag=1;
+//	
+//  }
+	
+	
 }
 
 
@@ -851,7 +857,14 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
 {
   /* Turn LED3 on: Transfer in transmission/reception process is correct */
  // BSP_LED_On(LED3);
-	
+	//			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_SET);  // set high
+	//      HAL_Delay(100);
+	//			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_RESET);  // set low
+	//      HAL_Delay(100);
+	//      HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_SET);  // set high
+	//      HAL_Delay(100);
+	//			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_RESET);  // set low
+	//      HAL_Delay(100);
 	//	  if(HAL_UART_Transmit(&UartHandle, (uint8_t*)aRxBuffer, BUFFERSIZE, 1000)!= HAL_OK)
   //{
   //  Error_Handler();   
