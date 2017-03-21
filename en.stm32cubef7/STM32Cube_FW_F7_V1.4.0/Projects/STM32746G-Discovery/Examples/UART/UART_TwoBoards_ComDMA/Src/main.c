@@ -43,8 +43,9 @@ uint32_t uwPrescalerValue = 0;
 uint8_t aTxBuffer[] = "\n abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz\n";
 uint8_t aTxBuffer_Error[] = "\n ERROR!\n";
 
-uint8_t SPI_TxBuffer[] = "hello\n";
+uint8_t SPI_TxBuffer[] = {'a','b','c',0,0,0,0,0};
 uint8_t SPI_RxBuffer[SPI_BUFFERSIZE];
+//uint8_t SPI_RxBuffer[] = "xxxxx\n";
 uint8_t SPI_STMF0_FLAG=0; // flag for handling SPI comms to the STM32F0, flag is 0 when free, and 1 when it is active
 //uint8_t SPI_RxBuffer[] = "hello";
 
@@ -65,6 +66,7 @@ static void GPIO_Init(void);
 static void ADA_Timer_Init(void);
 static void TIM_Init(void);
 uint8_t LED_Test_Flag=0; 
+uint8_t SPI_Init_Flag=0; // flag used to stop the uart sending anything until the spi comms have begun
 /* Private define ------------------------------------------------------------*/
 enum {
 	TRANSFER_WAIT,
@@ -353,7 +355,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 					}	
 
 					SPI_STMF0_FLAG=1;
-//	
+					SPI_Init_Flag=1; // UART comms can now begin
+//	    
 //				while (HAL_SPI_GetState(&SpiHandle) != HAL_SPI_STATE_READY)
 //				{
 //				} 
@@ -365,11 +368,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			
 			if (htim->Instance==TIM2) //check if this assosiated with the UART clock
       {
-
+				if(SPI_Init_Flag==1)
+				{
+					if( (SPI_RxBuffer[0]=='x') && (SPI_RxBuffer[1]=='y') && (SPI_RxBuffer[2]=='z') )
+					{
 			  	//HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer, strlen(aTxBuffer));
-				  HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)SPI_RxBuffer, strlen(SPI_RxBuffer)); //send what is recieved from the SPI
+				  HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)SPI_RxBuffer, SPI_BUFFERSIZE); //send what is recieved from the SPI
 			    //HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)SPI_TxBuffer, 16); //send what is recieved from the SPI
-
+					}
+				}
 			}
 			
 }

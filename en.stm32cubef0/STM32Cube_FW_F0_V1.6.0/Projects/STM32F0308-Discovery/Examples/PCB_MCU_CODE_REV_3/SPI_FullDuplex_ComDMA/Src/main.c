@@ -118,7 +118,8 @@ uint32_t uwPrescalerValue = 0;
  q31_t ADC_Value;
 
 /* Buffer used for transmission */
-uint8_t aTxBuffer[] = "hello\n";
+//uint8_t aTxBuffer[] = "hello\n";
+uint8_t aTxBuffer[] = {'x','y','z','1','2','3','4','\n'};
 uint8_t otherbuffer[] = "HELLO \n\n";
 uint8_t otherbuffer2[] = "\n";
 /* Buffer used for reception */
@@ -140,6 +141,7 @@ static void EXTI4_15_IRQHandler_Config(void);
 static void SPI_Handler_Function(void);
 /* Private functions ---------------------------------------------------------*/
 uint8_t SPI_Flag=0;
+uint8_t SPI_Init_Flag=0; // flag that is set the first time the SPI is activated, the spi handler wont start until this goes high
 uint8_t LED_Test_Flag=0; 
 /**
   * @brief  Main program
@@ -169,7 +171,7 @@ int main(void)
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_SET);  // set high
 	  HAL_Delay(1000); // seemingly we need this...?
   //  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1|GPIO_PIN_3, GPIO_PIN_RESET);  // set low
-		HAL_Delay(1000);
+		HAL_Delay(100);
 	
 	
 	
@@ -281,7 +283,7 @@ static void SPI_Handler_Function(void)
 			
 		
 		//if( (SPI_Flag==1) && (HAL_SPI_GetState(&SpiHandle) == HAL_SPI_STATE_READY) )
-	  if( SPI_Flag==1)
+	  if( (SPI_Flag==1) && (SPI_Init_Flag==1))
 		{
 			
 			  if (HAL_SPI_DeInit(&SpiHandle) != HAL_OK) //disable spi
@@ -751,6 +753,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 
 	  if (GPIO_Pin == GPIO_PIN_4)
+			
+		if(SPI_Init_Flag==0)
+		{
+			SPI_Init_Flag=1; // set the flag high forever
+		}
 	//if(1)
   {
 		if(LED_Test_Flag==0)

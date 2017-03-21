@@ -97,7 +97,7 @@
 #define USARTx_RX_AF                     GPIO_AF1_USART1
 
 /* Size of buffer */
-#define BUFFERSIZE                       (COUNTOF(aTxBuffer) - 1)
+#define BUFFERSIZE                       (COUNTOF(aTxBuffer))
 
 /* Exported macro ------------------------------------------------------------*/
 #define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
