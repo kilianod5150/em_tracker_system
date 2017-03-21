@@ -28,27 +28,27 @@ Project File Date:  02/15/2017
 *** Using Compiler 'V5.06 update 2 (build 183)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'STM32F0308-Discovery'
 compiling main.c...
-..\Src\main.c(684): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "const char *"
+..\Src\main.c(704): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "const char *"
     if(HAL_UART_Transmit(&UartHandle, (uint8_t*)otherbuffer, strlen(otherbuffer), 5000)!= HAL_OK)
-..\Src\main.c(653): warning:  #177-D: function "UART_Init" was declared but never referenced
+..\Src\main.c(673): warning:  #177-D: function "UART_Init" was declared but never referenced
   static void UART_Init(void)
-..\Src\main.c(478): warning:  #177-D: function "ADC_Init" was declared but never referenced
+..\Src\main.c(498): warning:  #177-D: function "ADC_Init" was declared but never referenced
   static void ADC_Init(void)
-..\Src\main.c(322): warning:  #177-D: function "TIM_Init" was declared but never referenced
+..\Src\main.c(342): warning:  #177-D: function "TIM_Init" was declared but never referenced
   static void TIM_Init(void)
-..\Src\main.c(393): warning:  #177-D: function "TIM_PWM_Init" was declared but never referenced
+..\Src\main.c(413): warning:  #177-D: function "TIM_PWM_Init" was declared but never referenced
   static void TIM_PWM_Init(void)
-..\Src\main.c(541): warning:  #177-D: function "Demodulator_Init" was declared but never referenced
+..\Src\main.c(561): warning:  #177-D: function "Demodulator_Init" was declared but never referenced
   static void Demodulator_Init(void)
-..\Src\main.c(943): warning:  #177-D: function "Buffercmp" was declared but never referenced
+..\Src\main.c(963): warning:  #177-D: function "Buffercmp" was declared but never referenced
   static uint16_t Buffercmp(uint8_t* pBuffer1, uint8_t* pBuffer2, uint16_t BufferLength)
-..\Src\main.c(894): warning:  #177-D: function "Timeout_Error_Handler" was declared but never referenced
+..\Src\main.c(914): warning:  #177-D: function "Timeout_Error_Handler" was declared but never referenced
   static void Timeout_Error_Handler(void)
-..\Src\main.c(704): warning:  #177-D: function "EXTI0_1_IRQHandler_Config" was declared but never referenced
+..\Src\main.c(724): warning:  #177-D: function "EXTI0_1_IRQHandler_Config" was declared but never referenced
   static void EXTI0_1_IRQHandler_Config(void)
 ..\Src\main.c: 9 warnings, 0 errors
 linking...
-Program Size: Code=5880 RO-data=228 RW-data=40 ZI-data=1384  
+Program Size: Code=5932 RO-data=228 RW-data=44 ZI-data=1404  
 "STM32F0308-Discovery\STM32F0308-Discovery.axf" - 0 Error(s), 9 Warning(s).
 
 <h2>Software Packages used:</h2>
@@ -67,7 +67,7 @@ Package Vendor: ARM
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.0.0
-Build Time Elapsed:  00:00:02
+Build Time Elapsed:  00:00:04
 </pre>
 </body>
 </html>

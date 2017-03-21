@@ -119,11 +119,12 @@ uint32_t uwPrescalerValue = 0;
 
 /* Buffer used for transmission */
 //uint8_t aTxBuffer[] = "hello\n";
-uint8_t aTxBuffer[] = {'x','y','z','1','2','3','4','\n'};
+uint8_t aTxBuffer[] = {'x','y','z',1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,'\n'}; // define array for transmitting the recorded currents
 uint8_t otherbuffer[] = "HELLO \n\n";
 uint8_t otherbuffer2[] = "\n";
 /* Buffer used for reception */
 uint8_t aRxBuffer[BUFFERSIZE];
+	
 
 /* Private function prototypes -----------------------------------------------*/
 static void SystemClock_Config(void);
@@ -143,6 +144,8 @@ static void SPI_Handler_Function(void);
 uint8_t SPI_Flag=0;
 uint8_t SPI_Init_Flag=0; // flag that is set the first time the SPI is activated, the spi handler wont start until this goes high
 uint8_t LED_Test_Flag=0; 
+uint16_t Demodulated_Current[8]; //define a 16 bit array of all the measured coil currents
+uint16_t Test_Current=0; // a variable to incremented to simulated a varying current signal
 /**
   * @brief  Main program
   * @param  None
@@ -285,6 +288,23 @@ static void SPI_Handler_Function(void)
 		//if( (SPI_Flag==1) && (HAL_SPI_GetState(&SpiHandle) == HAL_SPI_STATE_READY) )
 	  if( (SPI_Flag==1) && (SPI_Init_Flag==1))
 		{
+			
+			//Test_Current++; // for debug only, increments everytime the spi comms are activated
+			// Now add these measurements to the aTxBuffer
+			
+			
+			if( (aRxBuffer[0]=='a') && (aRxBuffer[1]=='b') && (aRxBuffer[2]=='c') )
+					{
+				for(int i=0; i<8; i++)
+					{
+					//aTxBuffer[2*i+3]=(uint8_t)((Test_Current&0xFF00)>>8); // shift the high bit down
+          //aTxBuffer[2*i+4]=(uint8_t)(Test_Current&0x00FF);
+						aTxBuffer[2*i+3]=aRxBuffer[2*i+3]; 
+						aTxBuffer[2*i+4]=aRxBuffer[2*i+4]; 
+					}	
+			
+					}
+			
 			
 			  if (HAL_SPI_DeInit(&SpiHandle) != HAL_OK) //disable spi
   {

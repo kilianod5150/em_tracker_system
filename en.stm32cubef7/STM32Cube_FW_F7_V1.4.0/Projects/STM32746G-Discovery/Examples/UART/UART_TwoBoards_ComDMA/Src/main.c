@@ -42,12 +42,15 @@ uint32_t uwPrescalerValue = 0;
 /* Buffer used for transmission */
 uint8_t aTxBuffer[] = "\n abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz\n";
 uint8_t aTxBuffer_Error[] = "\n ERROR!\n";
-
-uint8_t SPI_TxBuffer[] = {'a','b','c',0,0,0,0,0};
+uint8_t temp_string[256];
+uint8_t SPI_TxBuffer[] = {'a','b','c',1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,'\n'};
 uint8_t SPI_RxBuffer[SPI_BUFFERSIZE];
 //uint8_t SPI_RxBuffer[] = "xxxxx\n";
 uint8_t SPI_STMF0_FLAG=0; // flag for handling SPI comms to the STM32F0, flag is 0 when free, and 1 when it is active
 //uint8_t SPI_RxBuffer[] = "hello";
+uint16_t Freq_Store[8]={17000,18000,19000,20000,21000,22000,23000,24000};
+
+
 
 /* Buffer used for reception */
 uint8_t aRxBuffer[RXBUFFERSIZE];
@@ -125,6 +128,15 @@ int main(void)
 //	
 //	
 
+			for(int i=0; i<8; i++)
+				{
+					SPI_TxBuffer[2*i+3]=(uint8_t)((Freq_Store[i]&0xFF00)>>8); // shift the high bit down
+          SPI_TxBuffer[2*i+4]=(uint8_t)(Freq_Store[i]&0x00FF);
+
+				}	
+
+
+
  GPIO_Init();
 
  SPI_Init();
@@ -195,7 +207,7 @@ void SPI_Init(void)
 	  /*##-1- Configure the SPI peripheral #######################################*/
   /* Set the SPI parameters */
   SpiHandle.Instance               = SPIx;
-  SpiHandle.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
+  SpiHandle.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
   SpiHandle.Init.Direction         = SPI_DIRECTION_2LINES;
   SpiHandle.Init.CLKPhase          = SPI_PHASE_1EDGE;
   SpiHandle.Init.CLKPolarity       = SPI_POLARITY_HIGH;
@@ -372,8 +384,23 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 				{
 					if( (SPI_RxBuffer[0]=='x') && (SPI_RxBuffer[1]=='y') && (SPI_RxBuffer[2]=='z') )
 					{
+						//for debug, lets decode the returned data and make sure it looks good
+						uint16_t Temp_Data[8];
+						Temp_Data[0]=(SPI_RxBuffer[3]<<8)+SPI_RxBuffer[4];
+						Temp_Data[1]=(SPI_RxBuffer[5]<<8)+SPI_RxBuffer[6];
+						Temp_Data[2]=(SPI_RxBuffer[7]<<8)+SPI_RxBuffer[8];
+						Temp_Data[3]=(SPI_RxBuffer[9]<<8)+SPI_RxBuffer[10];
+						Temp_Data[4]=(SPI_RxBuffer[11]<<8)+SPI_RxBuffer[12];
+						Temp_Data[5]=(SPI_RxBuffer[13]<<8)+SPI_RxBuffer[14];
+						Temp_Data[6]=(SPI_RxBuffer[15]<<8)+SPI_RxBuffer[16];
+						Temp_Data[7]=(SPI_RxBuffer[17]<<8)+SPI_RxBuffer[18];
+						
+					//uint8_t temp_string;	
+					sprintf(temp_string,"1=%d \t 2=%d \t 3=%d \t 4=%d \t 5=%d \t 6=%d \t 7=%d \t 8=%d \t\n",Temp_Data[0],Temp_Data[1],Temp_Data[2], Temp_Data[3], Temp_Data[4], Temp_Data[5], Temp_Data[6], Temp_Data[7] );	
+						
+						
 			  	//HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer, strlen(aTxBuffer));
-				  HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)SPI_RxBuffer, SPI_BUFFERSIZE); //send what is recieved from the SPI
+				  HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)temp_string, strlen(temp_string) ); //send what is recieved from the SPI
 			    //HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)SPI_TxBuffer, 16); //send what is recieved from the SPI
 					}
 				}
